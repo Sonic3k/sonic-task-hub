@@ -1,0 +1,82 @@
+# ================================
+# ROOT LEVEL GITIGNORE
+# ================================
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.settings/
+.classpath
+.project
+*.iml
+*.ipr
+*.iws
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# ================================
+# BACKEND (Spring Boot)
+# ================================
+
+# Maven
+sonic-task-hub-api/target/
+sonic-task-hub-api/.mvn/
+!sonic-task-hub-api/.mvn/wrapper/maven-wrapper.jar
+
+# Database files
+*.db
+*.sqlite
+sonic-task-hub-api/data/
+/data/
+
+# Spring Boot
+sonic-task-hub-api/.spring-boot-devtools.properties
+
+# Logs
+*.log
+sonic-task-hub-api/logs/
+
+# ================================
+# FRONTEND (React + Vite)
+# ================================
+
+# Dependencies
+sonic-task-hub-web/node_modules/
+sonic-task-hub-web/.pnp
+sonic-task-hub-web/.pnp.js
+
+# Production builds
+sonic-task-hub-web/dist/
+sonic-task-hub-web/build/
+
+# Development
+sonic-task-hub-web/.vscode/
+sonic-task-hub-web/*.tsbuildinfo
+
+# Environment variables
+sonic-task-hub-web/.env.local
+sonic-task-hub-web/.env.development.local
+sonic-task-hub-web/.env.test.local
+sonic-task-hub-web/.env.production.local
+
+# Logs
+sonic-task-hub-web/npm-debug.log*
+sonic-task-hub-web/yarn-debug.log*
+sonic-task-hub-web/yarn-error.log*
+sonic-task-hub-web/pnpm-debug.log*
+sonic-task-hub-web/lerna-debug.log*
+
+# Coverage
+sonic-task-hub-web/coverage/
