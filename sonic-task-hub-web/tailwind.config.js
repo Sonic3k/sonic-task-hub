@@ -1,4 +1,4 @@
-// sonic-task-hub-web/tailwind.config.js
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -11,31 +11,30 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {
-        // Custom color palette for Sonic Task Hub
-        sonic: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        // Claude color palette
+        claude: {
+          purple: '#483b85',
+          'purple-light': '#f8f6ff',
+          'purple-dark': '#3d2f6f',
         },
-        hub: {
-          50: '#fdf4ff',
-          100: '#fae8ff',
-          200: '#f5d0fe',
-          300: '#f0abfc',
-          400: '#e879f9',
-          500: '#d946ef',
-          600: '#c026d3',
-          700: '#a21caf',
-          800: '#86198f',
-          900: '#701a75',
-        }
+        // Sonic Task Hub custom colors inspired by Claude
+        sonic: {
+          50: '#f8f6ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa',
+          500: '#483b85', // Main Claude purple
+          600: '#3d2f6f',
+          700: '#322659',
+          800: '#2a1f4a',
+          900: '#1e1638',
+        },
+        // Updated utility colors to match Claude vibe
+        success: '#198754',
+        danger: '#dc3545',
+        info: '#2563eb',
+        warning: '#f59e0b',
       },
       spacing: {
         '18': '4.5rem',
@@ -43,7 +42,7 @@ export default {
         '128': '32rem',
       },
       animation: {
-        'fade-in': 'fadeIn 0.2s ease-out',
+        'fade-in': 'fadeIn 0.3s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
         'pulse-soft': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -77,6 +76,7 @@ export default {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-claude': 'linear-gradient(135deg, #483b85, #6366f1)',
       },
       backdropBlur: {
         xs: '2px',
@@ -84,11 +84,15 @@ export default {
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'soft-lg': '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'claude': '0 4px 20px -2px rgba(72, 59, 133, 0.1)',
       },
       borderRadius: {
         'xl': '0.75rem',
         '2xl': '1rem',
         '3xl': '1.5rem',
+      },
+      ringColor: {
+        'claude': '#483b85',
       }
     },
   },

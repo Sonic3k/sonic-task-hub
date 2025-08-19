@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, FileText, Table, Filter } from 'lucide-react';
+import { X, Download, FileText, Table, Filter, Sparkles } from 'lucide-react';
 import { Item, ItemFilters, ItemType, ItemStatus, Priority } from '../types';
 import { itemApi, apiHelpers } from '../services/api';
 import toast from 'react-hot-toast';
@@ -28,48 +28,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     try {
       setLoading(true);
 
-      // Build export filters
       const exportFilters: ItemFilters = {
         ...filters,
         page: 0,
-        size: 10000, // Large number to get all items
+        size: 10000,
       };
 
-      // Apply date range filters
-      if (dateRange !== 'all') {
-        const now = new Date();
-        let startDate: Date;
-
-        switch (dateRange) {
-          case 'week':
-            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            break;
-          case 'month':
-            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            break;
-          case 'custom':
-            if (!customStartDate || !customEndDate) {
-              toast.error('Please select both start and end dates');
-              return;
-            }
-            startDate = new Date(customStartDate);
-            break;
-          default:
-            startDate = new Date(0);
-        }
-
-        // Note: The backend doesn't have date range filters in the current API
-        // This would need to be implemented on the backend or filtered client-side
-      }
-
-      // Apply status filters
-      if (!includeCompleted && !includeSnoozed) {
-        exportFilters.status = ItemStatus.PENDING;
-      } else if (!includeCompleted) {
-        // Would need multiple status filter support in backend
-      }
-
-      // Fetch all items
       const response = await itemApi.getWithFilters(userId, exportFilters);
       
       if (!response.data.success || !response.data.data) {
@@ -78,7 +42,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
       let items = response.data.data.content;
 
-      // Client-side filtering for options not supported by backend
+      // Client-side filtering
       if (!includeCompleted) {
         items = items.filter(item => item.status !== ItemStatus.COMPLETED);
       }
@@ -120,22 +84,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   const exportToCSV = (items: Item[]) => {
     const headers = [
-      'ID',
-      'Title',
-      'Description',
-      'Type',
-      'Priority',
-      'Complexity',
-      'Status',
-      'Due Date',
-      'Completed At',
-      'Category',
-      'Parent Item',
-      'Subtask Count',
-      'Estimated Duration',
-      'Actual Duration',
-      'Created At',
-      'Updated At'
+      'ID', 'Title', 'Description', 'Type', 'Priority', 'Complexity', 'Status',
+      'Due Date', 'Completed At', 'Category', 'Parent Item', 'Subtask Count',
+      'Estimated Duration', 'Actual Duration', 'Created At', 'Updated At'
     ];
 
     const csvContent = [
@@ -188,12 +139,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <Download className="w-5 h-5" />
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                   style={{ backgroundColor: '#483b85' }}>
+                <Download className="w-3 h-3 text-white" />
+              </div>
               Export Data
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -202,7 +156,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -216,43 +170,53 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               Export Format
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                exportFormat === 'csv' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-              }`}>
+              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                exportFormat === 'csv' 
+                  ? 'border-transparent text-white shadow-sm' 
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              style={exportFormat === 'csv' ? { backgroundColor: '#483b85' } : {}}>
                 <input
                   type="radio"
                   name="exportFormat"
                   value="csv"
                   checked={exportFormat === 'csv'}
                   onChange={(e) => setExportFormat(e.target.value as 'csv' | 'json')}
-                  className="text-blue-600"
+                  className="sr-only"
                 />
                 <div>
-                  <div className="flex items-center gap-2 font-medium text-gray-900">
+                  <div className="flex items-center gap-2 font-medium">
                     <Table className="w-4 h-4" />
                     CSV
                   </div>
-                  <div className="text-xs text-gray-600">Excel compatible</div>
+                  <div className={`text-xs ${exportFormat === 'csv' ? 'text-white/80' : 'text-gray-600'}`}>
+                    Excel compatible
+                  </div>
                 </div>
               </label>
 
-              <label className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${
-                exportFormat === 'json' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-              }`}>
+              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                exportFormat === 'json' 
+                  ? 'border-transparent text-white shadow-sm' 
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              style={exportFormat === 'json' ? { backgroundColor: '#483b85' } : {}}>
                 <input
                   type="radio"
                   name="exportFormat"
                   value="json"
                   checked={exportFormat === 'json'}
                   onChange={(e) => setExportFormat(e.target.value as 'csv' | 'json')}
-                  className="text-blue-600"
+                  className="sr-only"
                 />
                 <div>
-                  <div className="flex items-center gap-2 font-medium text-gray-900">
+                  <div className="flex items-center gap-2 font-medium">
                     <FileText className="w-4 h-4" />
                     JSON
                   </div>
-                  <div className="text-xs text-gray-600">Raw data format</div>
+                  <div className={`text-xs ${exportFormat === 'json' ? 'text-white/80' : 'text-gray-600'}`}>
+                    Raw data format
+                  </div>
                 </div>
               </label>
             </div>
@@ -266,7 +230,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value as 'all' | 'week' | 'month' | 'custom')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-3"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent mb-3"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             >
               <option value="all">All time</option>
               <option value="week">Last 7 days</option>
@@ -282,7 +247,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                    style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
                   />
                 </div>
                 <div>
@@ -291,7 +257,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                    style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
                   />
                 </div>
               </div>
@@ -303,13 +270,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Include in Export
             </label>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={includeCompleted}
                   onChange={(e) => setIncludeCompleted(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600"
+                  className="rounded border-gray-300"
+                  style={{ color: '#483b85' }}
                 />
                 <span className="text-sm text-gray-700">Completed items</span>
               </label>
@@ -319,7 +287,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   type="checkbox"
                   checked={includeSnoozed}
                   onChange={(e) => setIncludeSnoozed(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600"
+                  className="rounded border-gray-300"
+                  style={{ color: '#483b85' }}
                 />
                 <span className="text-sm text-gray-700">Snoozed items</span>
               </label>
@@ -329,7 +298,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   type="checkbox"
                   checked={includeSubtasks}
                   onChange={(e) => setIncludeSubtasks(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600"
+                  className="rounded border-gray-300"
+                  style={{ color: '#483b85' }}
                 />
                 <span className="text-sm text-gray-700">Subtasks</span>
               </label>
@@ -338,18 +308,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
           {/* Current Filters Info */}
           {(filters.type || filters.status || filters.priority || filters.search) && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-yellow-800 mb-2">
+            <div className="rounded-xl p-4 border"
+                 style={{ backgroundColor: '#f8f6ff', borderColor: '#483b85' }}>
+              <div className="flex items-center gap-2 font-medium mb-2"
+                   style={{ color: '#483b85' }}>
                 <Filter className="w-4 h-4" />
-                <span className="text-sm font-medium">Active Filters</span>
+                <span className="text-sm">Active Filters</span>
               </div>
-              <div className="text-xs text-yellow-700 space-y-1">
+              <div className="text-xs space-y-1"
+                   style={{ color: '#483b85' }}>
                 {filters.type && <div>Type: {filters.type}</div>}
                 {filters.status && <div>Status: {filters.status}</div>}
                 {filters.priority && <div>Priority: {filters.priority}</div>}
                 {filters.search && <div>Search: "{filters.search}"</div>}
               </div>
-              <div className="text-xs text-yellow-600 mt-2">
+              <div className="text-xs mt-2 opacity-80"
+                   style={{ color: '#483b85' }}>
                 Export will include these filters
               </div>
             </div>
@@ -360,14 +334,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleExport}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-3 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-opacity"
+            style={{ backgroundColor: '#483b85' }}
           >
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

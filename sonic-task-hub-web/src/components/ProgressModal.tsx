@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, TrendingUp, Clock, Calendar, Hash, FileText } from 'lucide-react';
+import { X, TrendingUp, Clock, Calendar, Hash, FileText, Sparkles } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Item, ProgressFormData } from '../types';
 import { progressApi, apiHelpers } from '../services/api';
@@ -26,7 +26,7 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
     formState: { errors }
   } = useForm<ProgressFormData>({
     defaultValues: {
-      sessionDate: new Date().toISOString().split('T')[0], // Today
+      sessionDate: new Date().toISOString().split('T')[0],
       duration: undefined,
       notes: '',
       progressValue: undefined,
@@ -66,12 +66,15 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                   style={{ backgroundColor: '#483b85' }}>
+                <TrendingUp className="w-3 h-3 text-white" />
+              </div>
               Log Progress
             </h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -80,7 +83,7 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -97,7 +100,8 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
             <input
               type="date"
               {...register('sessionDate', { required: 'Session date is required' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             />
             {errors.sessionDate && (
               <p className="text-red-600 text-sm mt-1">{errors.sessionDate.message}</p>
@@ -117,7 +121,8 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
                 valueAsNumber: true,
                 min: { value: 1, message: 'Duration must be at least 1 minute' }
               })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               placeholder="e.g., 30"
             />
             {errors.duration && (
@@ -143,7 +148,8 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
                   valueAsNumber: true,
                   min: { value: 0, message: 'Progress value cannot be negative' }
                 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
                 placeholder="e.g., 5"
               />
               {errors.progressValue && (
@@ -158,7 +164,8 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
               <input
                 type="text"
                 {...register('progressUnit')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
                 placeholder="e.g., pages, reps"
                 list="progressUnitSuggestions"
               />
@@ -183,7 +190,8 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
             <textarea
               {...register('notes')}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               placeholder="How did it go? Any insights or observations..."
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -192,9 +200,15 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
           </div>
 
           {/* Quick Examples */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">💡 Quick Examples:</h4>
-            <div className="text-xs text-blue-700 space-y-1">
+          <div className="rounded-xl p-4 border"
+               style={{ backgroundColor: '#f8f6ff', borderColor: '#483b85' }}>
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-2"
+                style={{ color: '#483b85' }}>
+              <Sparkles className="w-4 h-4" />
+              Quick Examples
+            </h4>
+            <div className="text-xs space-y-1"
+                 style={{ color: '#483b85' }}>
               <div><strong>Reading:</strong> 30 min, 15 pages</div>
               <div><strong>Exercise:</strong> 45 min, 3 sets of workout</div>
               <div><strong>Learning:</strong> 60 min, 2 lessons completed</div>
@@ -207,14 +221,15 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-3 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-opacity"
+              style={{ backgroundColor: '#483b85' }}
             >
               {loading && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

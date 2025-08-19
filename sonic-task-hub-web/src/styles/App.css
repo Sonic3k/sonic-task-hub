@@ -1,3 +1,29 @@
+/* Sidebar-specific styles */
+.sidebar {
+  @apply bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-screen;
+}
+
+.sidebar-collapsed {
+  @apply w-16;
+}
+
+.sidebar-expanded {
+  @apply w-64;
+}
+
+.sidebar-nav-item {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all;
+}
+
+.sidebar-nav-item.active {
+  @apply text-white shadow-sm;
+  background-color: #483b85;
+}
+
+.sidebar-nav-item:not(.active) {
+  @apply text-gray-700 hover:bg-gray-50;
+}
+
 /* Task Studio specific styles */
 .task-studio-table {
   @apply w-full border-collapse;
@@ -5,7 +31,7 @@
 
 .task-studio-table th,
 .task-studio-table td {
-  @apply text-left p-3 border-b border-gray-200;
+  @apply text-left p-4 border-b border-gray-200;
 }
 
 .task-studio-table th {
@@ -13,45 +39,25 @@
 }
 
 .task-studio-table tr:hover {
-  @apply bg-gray-50;
+  @apply bg-gray-50 transition-colors;
 }
 
 .task-studio-table tr.selected {
-  @apply bg-blue-50;
+  background-color: #f8f6ff;
 }
 
-/* Modal animations */
+/* Modal animations with smoother transitions */
 .modal-overlay {
   @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
   animation: fadeIn 0.2s ease-out;
 }
 
 .modal-content {
-  @apply bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4;
+  @apply bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4;
   animation: slideUp 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Priority indicators */
+/* Priority indicators with updated colors */
 .priority-high {
   @apply text-red-600 bg-red-50 border-red-200;
 }
@@ -94,66 +100,29 @@
   @apply text-orange-600 bg-orange-50 border-orange-200;
 }
 
-/* Custom checkbox styles */
-.custom-checkbox {
-  @apply appearance-none w-4 h-4 border-2 border-gray-300 rounded bg-white checked:bg-blue-600 checked:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 0.75rem;
-}
-
-.custom-checkbox:checked {
-  background-size: 0.75rem;
-}
-
-/* Loading states */
-.loading-shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* Bulk actions bar */
+/* Bulk actions bar with Claude styling */
 .bulk-actions-bar {
-  @apply bg-blue-50 border-blue-200 border-b transition-all duration-300;
+  @apply border-b border-gray-200 transition-all duration-300;
+  background-color: #f8f6ff;
   animation: slideDown 0.3s ease-out;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Filter pills */
+/* Filter pills with Claude colors */
 .filter-pill {
   @apply inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer;
 }
 
 .filter-pill.active {
-  @apply bg-blue-100 text-blue-700 border border-blue-200;
+  @apply text-white border;
+  background-color: #483b85;
+  border-color: #483b85;
 }
 
 .filter-pill .remove-filter {
   @apply ml-2 hover:text-red-600 cursor-pointer;
 }
 
-/* Empty state */
+/* Empty state styling */
 .empty-state {
   @apply text-center py-12 px-4;
 }
@@ -170,7 +139,7 @@
   @apply text-gray-600 mb-6 max-w-md mx-auto;
 }
 
-/* Pagination */
+/* Pagination with Claude styling */
 .pagination {
   @apply flex items-center gap-2;
 }
@@ -180,12 +149,13 @@
 }
 
 .pagination-button.active {
-  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700;
+  @apply text-white border-transparent;
+  background-color: #483b85;
 }
 
 /* Form sections */
 .form-section {
-  @apply space-y-4 p-4 border border-gray-200 rounded-lg;
+  @apply space-y-4 p-4 border border-gray-200 rounded-xl;
 }
 
 .form-section-title {
@@ -196,34 +166,81 @@
   @apply text-sm text-gray-600 mb-4;
 }
 
-/* Drag and drop (future enhancement) */
-.drag-preview {
-  @apply opacity-50 scale-95 transition-all duration-200;
+/* Login page styling */
+.login-brand-panel {
+  background-color: #483b85;
 }
 
-.drop-zone {
-  @apply border-2 border-dashed border-gray-300 rounded-lg p-4 transition-colors;
+.login-features-list {
+  @apply space-y-6 max-w-md;
 }
 
-.drop-zone.active {
-  @apply border-blue-500 bg-blue-50;
+.login-feature-item {
+  @apply flex items-start gap-3;
+}
+
+.login-feature-icon {
+  @apply w-5 h-5 text-white/60 mt-1 flex-shrink-0;
+}
+
+.login-feature-title {
+  @apply font-medium mb-1 text-white;
+}
+
+.login-feature-description {
+  @apply text-white/70 text-sm;
+}
+
+/* Stats cards in Task Studio */
+.stats-card {
+  @apply rounded-lg p-4 transition-all hover:scale-105;
+}
+
+.stats-card.pending {
+  @apply bg-gray-50;
+}
+
+.stats-card.completed {
+  @apply bg-green-50;
+}
+
+.stats-card.habits {
+  background-color: #f8f6ff;
+}
+
+.stats-card.overdue {
+  @apply bg-red-50;
+}
+
+/* Progress bars */
+.progress-bar {
+  @apply w-16 bg-gray-200 rounded-full h-2;
+}
+
+.progress-bar-fill {
+  @apply h-2 rounded-full transition-all;
+  background-color: #198754;
 }
 
 /* Toast customizations */
 .toast-success {
-  @apply bg-green-600 text-white;
+  background-color: #198754;
+  @apply text-white;
 }
 
 .toast-error {
-  @apply bg-red-600 text-white;
+  background-color: #dc3545;
+  @apply text-white;
 }
 
 .toast-warning {
-  @apply bg-orange-600 text-white;
+  background-color: #f59e0b;
+  @apply text-white;
 }
 
 .toast-info {
-  @apply bg-blue-600 text-white;
+  background-color: #2563eb;
+  @apply text-white;
 }
 
 /* Mobile optimizations */
@@ -234,15 +251,19 @@
   
   .task-studio-table th,
   .task-studio-table td {
-    @apply p-2;
+    @apply p-3;
   }
   
   .modal-content {
-    @apply max-h-screen overflow-y-auto;
+    @apply max-h-screen overflow-y-auto mx-2;
   }
   
   .form-section {
     @apply p-3;
+  }
+  
+  .sidebar-expanded {
+    @apply w-56;
   }
 }
 
@@ -274,4 +295,55 @@
   .modal-overlay {
     display: none !important;
   }
+  
+  .sidebar {
+    display: none !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    @apply border-2 border-black;
+  }
+  
+  .form-input {
+    @apply border-2 border-black;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .modal-content {
+    animation: none;
+  }
+  
+  .bulk-actions-bar {
+    animation: none;
+  }
+  
+  .hover-lift {
+    @apply transform-none;
+  }
+  
+  .transition-all {
+    @apply transition-none;
+  }
+}
+
+/* Custom focus indicators for accessibility */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-offset-2;
+  --tw-ring-color: #483b85;
+}
+
+/* Improve text selection */
+::selection {
+  background-color: #483b85;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #483b85;
+  color: white;
 }

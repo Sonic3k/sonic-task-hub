@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Tag, User } from 'lucide-react';
+import { X, Calendar, Clock, Tag, User, Sparkles } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { 
   Item, 
@@ -58,7 +58,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
   const watchedType = watch('type');
 
-  // Set parent item if creating subtask
   useEffect(() => {
     if (parentItem) {
       setValue('parentItemId', parentItem.id);
@@ -71,17 +70,11 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
     try {
       setLoading(true);
 
-      // Debug: Log the raw form data
-      console.log('Form data:', data);
-
-      // Convert date properly - ensure it's a valid ISO string or null
       let dueDate = null;
       if (data.dueDate && data.dueDate.trim() !== '') {
         try {
-          // Create date at end of day in local timezone
           const dateObj = new Date(data.dueDate + 'T23:59:59');
           dueDate = dateObj.toISOString();
-          console.log('Converted due date:', dueDate);
         } catch (error) {
           console.error('Date conversion error:', error);
           dueDate = null;
@@ -96,22 +89,16 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
         estimatedDuration: data.estimatedDuration || null
       };
 
-      // Debug: Log the final submit data
-      console.log('Submit data:', submitData);
-
       if (isEdit && item) {
-        const response = await itemApi.update(userId, item.id, submitData);
-        console.log('Update response:', response.data);
+        await itemApi.update(userId, item.id, submitData);
         toast.success('Item updated successfully!');
       } else {
-        const response = await itemApi.create(userId, submitData);
-        console.log('Create response:', response.data);
+        await itemApi.create(userId, submitData);
         toast.success(`${isSubtask ? 'Subtask' : 'Item'} created successfully!`);
       }
 
       onSave();
     } catch (error) {
-      console.error('Submit error:', error);
       toast.error(apiHelpers.handleApiError(error));
     } finally {
       setLoading(false);
@@ -133,11 +120,15 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                   style={{ backgroundColor: '#483b85' }}>
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
               {isEdit ? 'Edit Item' : isSubtask ? 'Add Subtask' : 'Add New Item'}
             </h2>
             {isSubtask && parentItem && (
@@ -148,7 +139,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -164,7 +155,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             <input
               type="text"
               {...register('title', { required: 'Title is required' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               placeholder="What needs to be done?"
             />
             {errors.title && (
@@ -180,12 +172,13 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             <textarea
               {...register('description')}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors resize-none"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               placeholder="Additional details..."
             />
           </div>
 
-          {/* Type (disabled if subtask) */}
+          {/* Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Type *
@@ -193,23 +186,24 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {Object.values(ItemType).map((type) => (
                 <div key={type}>
-                  <label className={`relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                  <label className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-gray-300 ${
                     watchedType === type 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  } ${isSubtask ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      ? 'border-transparent shadow-sm text-white' 
+                      : 'border-gray-200'
+                  } ${isSubtask ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  style={watchedType === type ? { backgroundColor: '#483b85' } : {}}>
                     <input
                       type="radio"
                       value={type}
-                      {...register('type')} // Remove required validation since it always has default value
+                      {...register('type')}
                       className="sr-only"
                       disabled={isSubtask}
                     />
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg">{TYPE_ICONS[type]}</span>
-                      <span className="font-medium text-gray-900">{type}</span>
+                      <span className="font-medium">{type}</span>
                     </div>
-                    <span className="text-xs text-gray-600">
+                    <span className={`text-xs ${watchedType === type ? 'text-white/80' : 'text-gray-600'}`}>
                       {getTypeDescription(type)}
                     </span>
                   </label>
@@ -217,7 +211,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               ))}
             </div>
             {isSubtask && (
-              <p className="text-xs text-blue-600 mt-2">
+              <p className="text-xs mt-2" style={{ color: '#483b85' }}>
                 ℹ️ Subtasks inherit the same type as their parent item
               </p>
             )}
@@ -225,14 +219,14 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
           {/* Priority & Complexity */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Priority */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Priority
               </label>
               <select
                 {...register('priority')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               >
                 {Object.values(Priority).map((priority) => (
                   <option key={priority} value={priority}>
@@ -242,14 +236,14 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               </select>
             </div>
 
-            {/* Complexity */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Complexity
               </label>
               <select
                 {...register('complexity')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               >
                 {Object.values(Complexity).map((complexity) => (
                   <option key={complexity} value={complexity}>
@@ -260,9 +254,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             </div>
           </div>
 
-          {/* Due Date & Estimated Duration */}
+          {/* Due Date & Duration */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Due Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
@@ -271,15 +264,15 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
               <input
                 type="date"
                 {...register('dueDate')}
-                min={new Date().toISOString().split('T')[0]} // Minimum date is today
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Optional: When should this be completed?
               </p>
             </div>
 
-            {/* Estimated Duration */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
@@ -292,7 +285,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
                   valueAsNumber: true,
                   min: { value: 1, message: 'Duration must be at least 1 minute' }
                 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
                 placeholder="e.g., 30"
               />
               {errors.estimatedDuration && (
@@ -309,7 +303,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             </label>
             <select
               {...register('categoryId', { valueAsNumber: true })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
               disabled={isSubtask}
             >
               <option value="">No category</option>
@@ -331,14 +326,15 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-3 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-opacity"
+              style={{ backgroundColor: '#483b85' }}
             >
               {loading && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

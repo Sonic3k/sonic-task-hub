@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, ChevronDown, MoreHorizontal, Plus, Check, Clock, Trash2, FileText, BarChart, GitBranch, TrendingUp } from 'lucide-react';
+import { Search, Filter, ChevronDown, MoreHorizontal, Plus, Check, Clock, Trash2, FileText, GitBranch, TrendingUp, Palette } from 'lucide-react';
 import { 
   Item, 
   ItemFilters, 
@@ -28,7 +28,7 @@ interface TaskStudioProps {
 }
 
 export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
-  // State management
+  // State management (giữ nguyên)
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,15 +36,14 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
   
-  // Filters and sorting
   const [filters, setFilters] = useState<ItemFilters>({
     page: 0,
     size: 20,
     sortBy: 'createdAt',
-    sortDirection: 'desc' // Show newest items first
+    sortDirection: 'desc'
   });
 
-  // Modals
+  // Modals (giữ nguyên)
   const [showItemForm, setShowItemForm] = useState(false);
   const [showSnoozeModal, setShowSnoozeModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -53,7 +52,7 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
   const [parentItemForSubtask, setParentItemForSubtask] = useState<Item | null>(null);
   const [progressItem, setProgressItem] = useState<Item | null>(null);
 
-  // Load data
+  // Load data functions (giữ nguyên)
   useEffect(() => {
     loadItems();
     loadCategories();
@@ -62,20 +61,15 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
   const loadItems = async () => {
     try {
       setLoading(true);
-      console.log('Loading items with filters:', filters);
-      
       const response = await itemApi.getWithFilters(userId, filters);
-      console.log('Items API response:', response.data);
       
       if (response.data.success && response.data.data) {
         const pageData = response.data.data;
-        console.log('Loaded items:', pageData.content);
         setItems(pageData.content);
         setTotalElements(pageData.totalElements);
         setTotalPages(pageData.totalPages);
       }
     } catch (error) {
-      console.error('Load items error:', error);
       toast.error(apiHelpers.handleApiError(error));
     } finally {
       setLoading(false);
@@ -93,7 +87,7 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
     }
   };
 
-  // Filter handlers
+  // All handler functions (giữ nguyên - chỉ copy from previous version)
   const updateFilters = (newFilters: Partial<ItemFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters, page: 0 }));
     setSelectedItems(new Set());
@@ -113,7 +107,6 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
     setFilters(prev => ({ ...prev, sortBy, sortDirection }));
   };
 
-  // Selection handlers
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedItems(new Set(items.map(item => item.id)));
@@ -132,7 +125,6 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
     setSelectedItems(newSelected);
   };
 
-  // Item actions
   const handleCompleteItem = async (itemId: number) => {
     try {
       await itemApi.complete(userId, itemId);
@@ -155,7 +147,6 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
     }
   };
 
-  // Bulk actions
   const handleBulkComplete = async () => {
     try {
       await itemApi.bulkComplete(userId, Array.from(selectedItems));
@@ -198,16 +189,11 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
     }
   };
 
-  // Form handlers
   const handleItemSaved = () => {
     setShowItemForm(false);
     setEditingItem(null);
     setParentItemForSubtask(null);
-    
-    // Force refresh by resetting filters to trigger reload
     setFilters(prev => ({ ...prev, page: 0 }));
-    
-    // Also force reload directly
     setTimeout(() => {
       loadItems();
     }, 100);
@@ -227,7 +213,6 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
   const handleProgressSaved = () => {
     setShowProgressModal(false);
     setProgressItem(null);
-    // Optionally reload items to update progress counts
   };
 
   const formatDate = (dateString?: string) => {
@@ -266,70 +251,122 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
     );
   };
 
+  const getStatsData = () => {
+    const pendingCount = items.filter(i => i.status === ItemStatus.PENDING).length;
+    const completedCount = items.filter(i => i.status === ItemStatus.COMPLETED).length;
+    const habitsCount = items.filter(i => i.type === ItemType.HABIT).length;
+    const overdueCount = items.filter(i => i.dueDate && new Date(i.dueDate) < new Date() && i.status !== ItemStatus.COMPLETED).length;
+
+    return { pendingCount, completedCount, habitsCount, overdueCount };
+  };
+
+  const { pendingCount, completedCount, habitsCount, overdueCount } = getStatsData();
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50 overflow-hidden">
+      {/* Header - Minimal with purple accent only on logo */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">🎨 Task Studio - Hub Management</h1>
-              <p className="text-gray-600 mt-1">
-                {totalElements} total items • {items.filter(i => i.status === ItemStatus.PENDING).length} pending • 
-                {items.filter(i => i.status === ItemStatus.COMPLETED).length} completed
-              </p>
-              <div className="flex items-center gap-4 mt-2 text-xs text-blue-600">
-                <div className="flex items-center gap-1">
-                  <GitBranch className="w-3 h-3" />
-                  <span>Click to add subtasks</span>
+              <div className="flex items-center gap-3 mb-3">
+                {/* Logo icon - purple accent */}
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                     style={{ backgroundColor: '#483b85' }}>
+                  <Palette className="w-4 h-4 text-white" />
                 </div>
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="w-3 h-3" />
-                  <span>Log progress for habits</span>
-                </div>
+                <h1 className="text-2xl font-semibold text-gray-900">Task Studio</h1>
+                <span className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md">
+                  Hub Management
+                </span>
               </div>
+              <p className="text-gray-600 text-sm">
+                {totalElements} total items • {pendingCount} pending • {completedCount} completed
+                {overdueCount > 0 && <span className="text-red-600 font-medium"> • {overdueCount} overdue</span>}
+              </p>
             </div>
+            
+            {/* Actions - purple only for primary action */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors text-sm font-medium"
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4 inline mr-2" />
                 Export
               </button>
+              {/* Primary action - purple */}
               <button
                 onClick={() => setShowItemForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition-opacity shadow-sm text-sm font-medium"
+                style={{ backgroundColor: '#483b85' }}
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 inline mr-2" />
                 Add Item
               </button>
+            </div>
+          </div>
+
+          {/* Stats - Neutral grays, no colors */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+            <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600 font-medium">Pending</span>
+              </div>
+              <div className="text-2xl font-semibold text-gray-900">{pendingCount}</div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <Check className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600 font-medium">Completed</span>
+              </div>
+              <div className="text-2xl font-semibold text-gray-900">{completedCount}</div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600 font-medium">Habits</span>
+              </div>
+              <div className="text-2xl font-semibold text-gray-900">{habitsCount}</div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-4 h-4 text-center text-gray-400 text-xs">⚠️</span>
+                <span className="text-sm text-gray-600 font-medium">Overdue</span>
+              </div>
+              <div className="text-2xl font-semibold text-gray-900">{overdueCount}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filters Bar */}
+      {/* Filters Bar - Clean neutral styling */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="px-8 py-4">
           <div className="flex items-center gap-4 flex-wrap">
-            {/* Search */}
-            <div className="relative flex-1 min-w-64">
+            {/* Search - purple focus ring */}
+            <div className="relative flex-1 min-w-80">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search tasks, habits, reminders..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent transition-colors bg-white"
+                style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
                 onChange={(e) => handleSearch(e.target.value)}
                 defaultValue={filters.search || ''}
               />
             </div>
 
-            {/* Type Filter */}
+            {/* Filters - all neutral */}
             <select
               value={filters.type || ''}
               onChange={(e) => updateFilters({ type: e.target.value as ItemType || undefined })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-sm"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             >
               <option value="">All Types</option>
               <option value={ItemType.TASK}>📝 Tasks</option>
@@ -337,11 +374,11 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
               <option value={ItemType.REMINDER}>💭 Reminders</option>
             </select>
 
-            {/* Status Filter */}
             <select
               value={filters.status || ''}
               onChange={(e) => updateFilters({ status: e.target.value as ItemStatus || undefined })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-sm"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             >
               <option value="">All Status</option>
               <option value={ItemStatus.PENDING}>Pending</option>
@@ -350,11 +387,11 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
               <option value={ItemStatus.SNOOZED}>Snoozed</option>
             </select>
 
-            {/* Priority Filter */}
             <select
               value={filters.priority || ''}
               onChange={(e) => updateFilters({ priority: e.target.value as Priority || undefined })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-sm"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             >
               <option value="">All Priorities</option>
               <option value={Priority.HIGH}>🔴 High</option>
@@ -362,11 +399,11 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
               <option value={Priority.LOW}>🔵 Low</option>
             </select>
 
-            {/* Category Filter */}
             <select
               value={filters.categoryId || ''}
               onChange={(e) => updateFilters({ categoryId: e.target.value ? Number(e.target.value) : undefined })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-sm"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             >
               <option value="">All Categories</option>
               {categories.map(category => (
@@ -376,11 +413,11 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
               ))}
             </select>
 
-            {/* Page Size */}
             <select
               value={filters.size}
               onChange={(e) => updateFilters({ size: Number(e.target.value) })}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-sm"
+              style={{ '--tw-ring-color': '#483b85' } as React.CSSProperties}
             >
               <option value={10}>10 per page</option>
               <option value={20}>20 per page</option>
@@ -391,42 +428,42 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
         </div>
       </div>
 
-      {/* Bulk Actions Bar */}
+      {/* Bulk Actions Bar - Neutral with red only for delete */}
       {selectedItems.size > 0 && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="bg-gray-50 border-b border-gray-200">
+          <div className="px-8 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-blue-800 font-medium">
+                <span className="text-gray-700 font-medium">
                   {selectedItems.size} items selected
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleBulkComplete}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                    className="px-3 py-1.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 text-sm font-medium transition-colors"
                   >
-                    <Check className="w-4 h-4" />
-                    Complete All
+                    <Check className="w-4 h-4 inline mr-1" />
+                    Complete
                   </button>
                   <button
                     onClick={handleBulkSnooze}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-orange-600 text-white rounded-md hover:bg-orange-700 text-sm"
+                    className="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm font-medium transition-colors"
                   >
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-4 h-4 inline mr-1" />
                     Snooze
                   </button>
                   <button
                     onClick={handleBulkDelete}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 inline mr-1" />
                     Delete
                   </button>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedItems(new Set())}
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Clear Selection
               </button>
@@ -436,281 +473,287 @@ export const TaskStudio: React.FC<TaskStudioProps> = ({ userId }) => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        ) : (
-          <>
-            {/* Items Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="w-12 p-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.size === items.length && items.length > 0}
-                        onChange={(e) => handleSelectAll(e.target.checked)}
-                        className="rounded border-gray-300"
-                      />
-                    </th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('title')}
-                    >
-                      <div className="flex items-center gap-2">
-                        Title
-                        <ChevronDown className="w-4 h-4" />
-                      </div>
-                    </th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('type')}
-                    >
-                      Type
-                    </th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('priority')}
-                    >
-                      Priority
-                    </th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('complexity')}
-                    >
-                      Complexity
-                    </th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('status')}
-                    >
-                      Status
-                    </th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('dueDate')}
-                    >
-                      Due Date
-                    </th>
-                    <th className="text-left p-3 font-medium text-gray-900">Category</th>
-                    <th className="text-left p-3 font-medium text-gray-900">Subtasks</th>
-                    <th 
-                      className="text-left p-3 font-medium text-gray-900 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('createdAt')}
-                    >
-                      Created
-                    </th>
-                    <th className="w-16 p-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {items.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="p-3">
+      <div className="flex-1 overflow-auto">
+        <div className="px-8 py-6">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2"
+                   style={{ borderBottomColor: '#483b85' }}></div>
+            </div>
+          ) : (
+            <>
+              {/* Items Table - Clean minimal styling */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="w-12 p-4">
                         <input
                           type="checkbox"
-                          checked={selectedItems.has(item.id)}
-                          onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                          className="rounded border-gray-300"
+                          checked={selectedItems.size === items.length && items.length > 0}
+                          onChange={(e) => handleSelectAll(e.target.checked)}
+                          className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
                         />
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-start gap-3">
-                          <span className="text-lg">{TYPE_ICONS[item.type]}</span>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              {item.parentItemId && (
-                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                  <GitBranch className="w-3 h-3" />
-                                  <span>Subtask</span>
+                      </th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('title')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Title
+                          <ChevronDown className="w-4 h-4 text-gray-400" />
+                        </div>
+                      </th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('type')}
+                      >
+                        Type
+                      </th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('priority')}
+                      >
+                        Priority
+                      </th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('complexity')}
+                      >
+                        Complexity
+                      </th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('status')}
+                      >
+                        Status
+                      </th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('dueDate')}
+                      >
+                        Due Date
+                      </th>
+                      <th className="text-left p-4 font-medium text-gray-700">Category</th>
+                      <th className="text-left p-4 font-medium text-gray-700">Progress</th>
+                      <th 
+                        className="text-left p-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort('createdAt')}
+                      >
+                        Created
+                      </th>
+                      <th className="w-20 p-4"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {items.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.has(item.id)}
+                            onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                            className="rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-start gap-3">
+                            <span className="text-lg">{TYPE_ICONS[item.type]}</span>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                {item.parentItemId && (
+                                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <GitBranch className="w-3 h-3" />
+                                    <span>Subtask</span>
+                                  </div>
+                                )}
+                                <div className="font-medium text-gray-900">{item.title}</div>
+                              </div>
+                              {item.description && (
+                                <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                  {item.description}
                                 </div>
                               )}
-                              <div className="font-medium text-gray-900">{item.title}</div>
-                            </div>
-                            {item.description && (
-                              <div className="text-sm text-gray-600 mt-1 line-clamp-2">
-                                {item.description}
-                              </div>
-                            )}
-                            {item.parentItemTitle && (
-                              <div className="text-xs text-blue-600 mt-1">
-                                ↳ Subtask of: {item.parentItemTitle}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          {item.type.toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${PRIORITY_COLORS[item.priority]}`}>
-                          {PRIORITY_ICONS[item.priority]} {item.priority.toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${COMPLEXITY_COLORS[item.complexity]}`}>
-                          {COMPLEXITY_ICONS[item.complexity]} {item.complexity.toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[item.status]}`}>
-                          {item.status.replace('_', ' ').toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        {formatDueDate(item.dueDate)}
-                      </td>
-                      <td className="p-3">
-                        {getCategoryDisplay(item)}
-                      </td>
-                      <td className="p-3">
-                        {item.subtaskCount > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
-                              {item.completedSubtaskCount}/{item.subtaskCount}
-                            </span>
-                            <div className="w-16 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-green-500 h-2 rounded-full transition-all"
-                                style={{ 
-                                  width: `${(item.completedSubtaskCount / item.subtaskCount) * 100}%` 
-                                }}
-                              />
+                              {item.parentItemTitle && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  ↳ Subtask of: {item.parentItemTitle}
+                                </div>
+                              )}
                             </div>
                           </div>
-                        ) : (
-                          <span className="text-xs text-gray-400">No subtasks</span>
-                        )}
-                      </td>
-                      <td className="p-3 text-sm text-gray-600">
-                        {formatDate(item.createdAt)}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-1">
-                          {item.status !== ItemStatus.COMPLETED && (
-                            <button
-                              onClick={() => handleCompleteItem(item.id)}
-                              className="p-1.5 text-green-600 hover:bg-green-50 rounded"
-                              title="Complete"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
+                        </td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                            {item.type.toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${PRIORITY_COLORS[item.priority]}`}>
+                            {PRIORITY_ICONS[item.priority]} {item.priority.toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${COMPLEXITY_COLORS[item.complexity]}`}>
+                            {COMPLEXITY_ICONS[item.complexity]} {item.complexity.toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[item.status]}`}>
+                            {item.status.replace('_', ' ').toLowerCase()}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {formatDueDate(item.dueDate)}
+                        </td>
+                        <td className="p-4">
+                          {getCategoryDisplay(item)}
+                        </td>
+                        <td className="p-4">
+                          {item.subtaskCount > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">
+                                {item.completedSubtaskCount}/{item.subtaskCount}
+                              </span>
+                              <div className="w-16 bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="h-2 rounded-full transition-all bg-gray-600"
+                                  style={{ 
+                                    width: `${(item.completedSubtaskCount / item.subtaskCount) * 100}%`
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">—</span>
                           )}
-                          
-                          {/* Add Subtask Button */}
-                          <button
-                            onClick={() => handleAddSubtask(item)}
-                            className="p-1.5 text-purple-600 hover:bg-purple-50 rounded"
-                            title="Add Subtask"
-                          >
-                            <GitBranch className="w-4 h-4" />
-                          </button>
-
-                          {/* Add Progress Button (for Habits) */}
-                          {item.type === ItemType.HABIT && (
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          {formatDate(item.createdAt)}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-1">
+                            {item.status !== ItemStatus.COMPLETED && (
+                              <button
+                                onClick={() => handleCompleteItem(item.id)}
+                                className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+                                title="Complete"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+                            )}
+                            
                             <button
-                              onClick={() => handleAddProgress(item)}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
-                              title="Log Progress"
+                              onClick={() => handleAddSubtask(item)}
+                              className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                              title="Add Subtask"
                             >
-                              <TrendingUp className="w-4 h-4" />
+                              <GitBranch className="w-4 h-4" />
                             </button>
-                          )}
-                          
-                          <button
-                            onClick={() => {
-                              setEditingItem(item);
-                              setParentItemForSubtask(null);
-                              setShowItemForm(true);
-                            }}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
-                            title="Edit"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
 
-              {items.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 text-lg mb-2">📝</div>
-                  <p className="text-gray-600 mb-4">No items found</p>
-                  <button
-                    onClick={() => setShowItemForm(true)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Create your first item
-                  </button>
+                            {item.type === ItemType.HABIT && (
+                              <button
+                                onClick={() => handleAddProgress(item)}
+                                className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                title="Log Progress"
+                              >
+                                <TrendingUp className="w-4 h-4" />
+                              </button>
+                            )}
+                            
+                            <button
+                              onClick={() => {
+                                setEditingItem(item);
+                                setParentItemForSubtask(null);
+                                setShowItemForm(true);
+                              }}
+                              className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                              title="Edit"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteItem(item.id)}
+                              className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Empty state - minimal */}
+                {items.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 text-4xl mb-4">📝</div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No items yet</h3>
+                    <p className="text-gray-600 mb-6">Create your first task, habit, or reminder to get started</p>
+                    <button
+                      onClick={() => setShowItemForm(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: '#483b85' }}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create Your First Item
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Pagination - neutral with purple accent */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6">
+                  <div className="text-sm text-gray-600">
+                    Showing {(filters.page || 0) * (filters.size || 20) + 1} to {Math.min(((filters.page || 0) + 1) * (filters.size || 20), totalElements)} of {totalElements} results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePageChange((filters.page || 0) - 1)}
+                      disabled={filters.page === 0}
+                      className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Previous
+                    </button>
+                    
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const page = i + Math.max(0, (filters.page || 0) - 2);
+                      if (page >= totalPages) return null;
+                      
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 text-sm border rounded-md transition-colors ${
+                            filters.page === page
+                              ? 'text-white border-transparent'
+                              : 'border-gray-300 hover:bg-gray-50'
+                          }`}
+                          style={filters.page === page ? { backgroundColor: '#483b85' } : {}}
+                        >
+                          {page + 1}
+                        </button>
+                      );
+                    })}
+                    
+                    <button
+                      onClick={() => handlePageChange((filters.page || 0) + 1)}
+                      disabled={filters.page === totalPages - 1}
+                      className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
               )}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-600">
-                  Showing {(filters.page || 0) * (filters.size || 20) + 1} to {Math.min(((filters.page || 0) + 1) * (filters.size || 20), totalElements)} of {totalElements} results
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange((filters.page || 0) - 1)}
-                    disabled={filters.page === 0}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    const page = i + Math.max(0, (filters.page || 0) - 2);
-                    if (page >= totalPages) return null;
-                    
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-3 py-2 text-sm border rounded-md ${
-                          filters.page === page
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page + 1}
-                      </button>
-                    );
-                  })}
-                  
-                  <button
-                    onClick={() => handlePageChange((filters.page || 0) + 1)}
-                    disabled={filters.page === totalPages - 1}
-                    className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Modals */}
+      {/* Modals - will redesign these next */}
       {showItemForm && (
         <ItemFormModal
           userId={userId}
