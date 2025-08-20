@@ -1,13 +1,24 @@
 package com.sonic.sonictaskhub.web.controller;
 
-import com.sonic.sonictaskhub.model.dto.UserDto;
-import com.sonic.sonictaskhub.model.response.BaseResponse;
-import com.sonic.sonictaskhub.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.sonic.sonictaskhub.model.dto.UserDto;
+import com.sonic.sonictaskhub.model.request.UserLoginRequest;
+import com.sonic.sonictaskhub.model.request.UserRegisterRequest;
+import com.sonic.sonictaskhub.model.response.BaseResponse;
+import com.sonic.sonictaskhub.service.UserService;
 
 /**
  * Controller for user management and authentication operations
@@ -27,23 +38,10 @@ public class UserController {
      * @return BaseResponse with created user data
      */
     @PostMapping("/register")
-    public BaseResponse<UserDto> registerUser(@RequestBody Map<String, String> request) {
+    public BaseResponse<UserDto> registerUser(@RequestBody UserRegisterRequest request) {
         try {
-            String username = request.get("username");
-            String password = request.get("password");
-            String email = request.get("email");
-            String displayName = request.get("displayName");
-
-            if (username == null || username.trim().isEmpty()) {
-                return BaseResponse.error("Username is required");
-            }
-            if (password == null || password.trim().isEmpty()) {
-                return BaseResponse.error("Password is required");
-            }
-
-            UserDto user = userService.registerUser(username.trim(), password, email, displayName);
+            UserDto user = userService.registerUser(request);
             return BaseResponse.success("User registered successfully", user);
-            
         } catch (Exception e) {
             return BaseResponse.error(e.getMessage());
         }
@@ -56,21 +54,10 @@ public class UserController {
      * @return BaseResponse with user data if authentication succeeds
      */
     @PostMapping("/login")
-    public BaseResponse<UserDto> loginUser(@RequestBody Map<String, String> request) {
+    public BaseResponse<UserDto> loginUser(@RequestBody UserLoginRequest request) {
         try {
-            String username = request.get("username");
-            String password = request.get("password");
-
-            if (username == null || username.trim().isEmpty()) {
-                return BaseResponse.error("Username is required");
-            }
-            if (password == null || password.trim().isEmpty()) {
-                return BaseResponse.error("Password is required");
-            }
-
-            UserDto user = userService.authenticateUser(username.trim(), password);
+            UserDto user = userService.authenticateUser(request);
             return BaseResponse.success("Login successful", user);
-            
         } catch (Exception e) {
             return BaseResponse.error(e.getMessage());
         }

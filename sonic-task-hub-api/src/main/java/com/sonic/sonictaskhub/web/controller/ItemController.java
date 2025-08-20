@@ -1,20 +1,30 @@
 package com.sonic.sonictaskhub.web.controller;
 
-import com.sonic.sonictaskhub.model.dto.ItemDto;
-import com.sonic.sonictaskhub.model.enums.Complexity;
-import com.sonic.sonictaskhub.model.enums.ItemStatus;
-import com.sonic.sonictaskhub.model.enums.ItemType;
-import com.sonic.sonictaskhub.model.enums.Priority;
-import com.sonic.sonictaskhub.model.response.BaseResponse;
-import com.sonic.sonictaskhub.service.ItemService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.sonic.sonictaskhub.model.dto.ItemDto;
+import com.sonic.sonictaskhub.model.enums.ItemStatus;
+import com.sonic.sonictaskhub.model.enums.ItemType;
+import com.sonic.sonictaskhub.model.enums.Priority;
+import com.sonic.sonictaskhub.model.request.ItemCreateRequest;
+import com.sonic.sonictaskhub.model.request.ItemUpdateRequest;
+import com.sonic.sonictaskhub.model.response.BaseResponse;
+import com.sonic.sonictaskhub.service.ItemService;
 
 /**
  * Controller for item management operations (Tasks, Habits, Reminders)
@@ -36,66 +46,11 @@ public class ItemController {
      */
     @PostMapping("/user/{userId}")
     public BaseResponse<ItemDto> createItem(@PathVariable(name = "userId") Long userId,
-                                           @RequestBody Map<String, Object> request) {
+                                           @RequestBody ItemCreateRequest request) {
         try {
-            System.out.println("=== CREATE ITEM DEBUG ===");
-            System.out.println("Raw request data: " + request);
-            
-            String title = (String) request.get("title");
-            String description = (String) request.get("description");
-            String typeStr = (String) request.get("type");
-            String priorityStr = (String) request.get("priority");
-            String complexityStr = (String) request.get("complexity");
-            String dueDateStr = (String) request.get("dueDate");
-            Object categoryIdObj = request.get("categoryId");
-            Object parentItemIdObj = request.get("parentItemId");
-            Object estimatedDurationObj = request.get("estimatedDuration");
-
-            System.out.println("Parsed dueDate string: " + dueDateStr);
-
-            if (title == null || title.trim().isEmpty()) {
-                return BaseResponse.error("Item title is required");
-            }
-            if (typeStr == null) {
-                return BaseResponse.error("Item type is required");
-            }
-
-            ItemType type = ItemType.valueOf(typeStr.toUpperCase());
-            Priority priority = priorityStr != null ? Priority.valueOf(priorityStr.toUpperCase()) : Priority.MEDIUM;
-            Complexity complexity = complexityStr != null ? Complexity.valueOf(complexityStr.toUpperCase()) : Complexity.MEDIUM;
-            
-            LocalDateTime dueDate = null;
-            if (dueDateStr != null && !dueDateStr.trim().isEmpty() && !"null".equals(dueDateStr)) {
-                try {
-                    dueDate = LocalDateTime.parse(dueDateStr);
-                    System.out.println("Parsed dueDate: " + dueDate);
-                } catch (Exception e) {
-                    System.out.println("Date parsing error: " + e.getMessage());
-                    return BaseResponse.error("Invalid due date format: " + dueDateStr);
-                }
-            }
-
-            Long categoryId = categoryIdObj != null && !"null".equals(categoryIdObj.toString()) ? Long.valueOf(categoryIdObj.toString()) : null;
-            Long parentItemId = parentItemIdObj != null && !"null".equals(parentItemIdObj.toString()) ? Long.valueOf(parentItemIdObj.toString()) : null;
-            Integer estimatedDuration = estimatedDurationObj != null && !"null".equals(estimatedDurationObj.toString()) ? Integer.valueOf(estimatedDurationObj.toString()) : null;
-
-            System.out.println("Final parsed values:");
-            System.out.println("- title: " + title);
-            System.out.println("- dueDate: " + dueDate);
-            System.out.println("- type: " + type);
-            System.out.println("- categoryId: " + categoryId);
-
-            ItemDto item = itemService.createItem(userId, title.trim(), description, type, priority, 
-                                                 complexity, dueDate, categoryId, parentItemId, estimatedDuration);
-            
-            System.out.println("Created item: " + item.getId() + " - " + item.getTitle());
-            System.out.println("=== END CREATE ITEM DEBUG ===");
-            
+            ItemDto item = itemService.createItem(userId, request);
             return BaseResponse.success("Item created successfully", item);
-            
         } catch (Exception e) {
-            System.out.println("Create item exception: " + e.getMessage());
-            e.printStackTrace();
             return BaseResponse.error(e.getMessage());
         }
     }
@@ -111,37 +66,10 @@ public class ItemController {
     @PutMapping("/user/{userId}/item/{itemId}")
     public BaseResponse<ItemDto> updateItem(@PathVariable(name = "userId") Long userId,
                                            @PathVariable(name = "itemId") Long itemId,
-                                           @RequestBody Map<String, Object> request) {
+                                           @RequestBody ItemUpdateRequest request) {
         try {
-            String title = (String) request.get("title");
-            String description = (String) request.get("description");
-            String typeStr = (String) request.get("type");
-            String priorityStr = (String) request.get("priority");
-            String complexityStr = (String) request.get("complexity");
-            String dueDateStr = (String) request.get("dueDate");
-            Object categoryIdObj = request.get("categoryId");
-            Object estimatedDurationObj = request.get("estimatedDuration");
-            String habitStage = (String) request.get("habitStage");
-            Object habitTargetDaysObj = request.get("habitTargetDays");
-
-            ItemType type = typeStr != null ? ItemType.valueOf(typeStr.toUpperCase()) : null;
-            Priority priority = priorityStr != null ? Priority.valueOf(priorityStr.toUpperCase()) : null;
-            Complexity complexity = complexityStr != null ? Complexity.valueOf(complexityStr.toUpperCase()) : null;
-            
-            LocalDateTime dueDate = null;
-            if (dueDateStr != null && !dueDateStr.trim().isEmpty()) {
-                dueDate = LocalDateTime.parse(dueDateStr);
-            }
-
-            Long categoryId = categoryIdObj != null ? Long.valueOf(categoryIdObj.toString()) : null;
-            Integer estimatedDuration = estimatedDurationObj != null ? Integer.valueOf(estimatedDurationObj.toString()) : null;
-            Integer habitTargetDays = habitTargetDaysObj != null ? Integer.valueOf(habitTargetDaysObj.toString()) : null;
-
-            ItemDto item = itemService.updateItem(userId, itemId, title, description, type, priority, 
-                                                 complexity, dueDate, categoryId, estimatedDuration,
-                                                 habitStage, habitTargetDays);
+            ItemDto item = itemService.updateItem(userId, itemId, request);
             return BaseResponse.success("Item updated successfully", item);
-            
         } catch (Exception e) {
             return BaseResponse.error(e.getMessage());
         }
@@ -201,7 +129,6 @@ public class ItemController {
         try {
             ItemDto item = itemService.getItemById(userId, itemId);
             return BaseResponse.success(item);
-            
         } catch (Exception e) {
             return BaseResponse.error(e.getMessage());
         }

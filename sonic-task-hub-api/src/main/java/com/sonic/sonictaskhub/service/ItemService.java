@@ -1,14 +1,9 @@
 package com.sonic.sonictaskhub.service;
 
-import com.sonic.sonictaskhub.model.dto.ItemDto;
-import com.sonic.sonictaskhub.model.entity.Category;
-import com.sonic.sonictaskhub.model.entity.Item;
-import com.sonic.sonictaskhub.model.entity.User;
-import com.sonic.sonictaskhub.model.enums.*;
-import com.sonic.sonictaskhub.repository.CategoryRepository;
-import com.sonic.sonictaskhub.repository.ItemProgressRepository;
-import com.sonic.sonictaskhub.repository.ItemRepository;
-import com.sonic.sonictaskhub.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,9 +12,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.sonic.sonictaskhub.model.dto.ItemDto;
+import com.sonic.sonictaskhub.model.entity.Category;
+import com.sonic.sonictaskhub.model.entity.Item;
+import com.sonic.sonictaskhub.model.entity.User;
+import com.sonic.sonictaskhub.model.enums.Complexity;
+import com.sonic.sonictaskhub.model.enums.ItemStatus;
+import com.sonic.sonictaskhub.model.enums.ItemType;
+import com.sonic.sonictaskhub.model.enums.Priority;
+import com.sonic.sonictaskhub.model.request.ItemCreateRequest;
+import com.sonic.sonictaskhub.model.request.ItemUpdateRequest;
+import com.sonic.sonictaskhub.repository.CategoryRepository;
+import com.sonic.sonictaskhub.repository.ItemProgressRepository;
+import com.sonic.sonictaskhub.repository.ItemRepository;
+import com.sonic.sonictaskhub.repository.UserRepository;
 
 @Service
 @Transactional
@@ -43,6 +49,50 @@ public class ItemService {
     private Long generateItemNumber(Long userId) {
         Long maxNumber = itemRepository.getMaxItemNumberForUser(userId);
         return (maxNumber != null ? maxNumber : 0L) + 1;
+    }
+    
+    /**
+     * Create a new item from request object
+     */
+    public ItemDto createItem(Long userId, ItemCreateRequest request) {
+        // Validate
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Item title is required");
+        }
+        if (request.getType() == null) {
+            throw new RuntimeException("Item type is required");
+        }
+
+        // Parse enums
+        ItemType type = ItemType.valueOf(request.getType().toUpperCase());
+        Priority priority = request.getPriority() != null ? 
+            Priority.valueOf(request.getPriority().toUpperCase()) : Priority.MEDIUM;
+        Complexity complexity = request.getComplexity() != null ? 
+            Complexity.valueOf(request.getComplexity().toUpperCase()) : Complexity.MEDIUM;
+
+        // Call existing method - 10 parameters như hiện tại
+        return createItem(userId, request.getTitle(), request.getDescription(), type,
+                         priority, complexity, request.getDueDate(), request.getCategoryId(),
+                         request.getParentItemId(), request.getEstimatedDuration());
+    }
+
+    /**
+     * Update an existing item from request object
+     */
+    public ItemDto updateItem(Long userId, Long itemId, ItemUpdateRequest request) {
+        // Parse enums
+        ItemType type = request.getType() != null ? 
+            ItemType.valueOf(request.getType().toUpperCase()) : null;
+        Priority priority = request.getPriority() != null ? 
+            Priority.valueOf(request.getPriority().toUpperCase()) : null;
+        Complexity complexity = request.getComplexity() != null ? 
+            Complexity.valueOf(request.getComplexity().toUpperCase()) : null;
+
+        // Call existing method - 12 parameters như hiện tại
+        return updateItem(userId, itemId, request.getTitle(), request.getDescription(),
+                         type, priority, complexity, request.getDueDate(), 
+                         request.getCategoryId(), request.getEstimatedDuration(),
+                         request.getHabitStage(), request.getHabitTargetDays());
     }
 
     /**

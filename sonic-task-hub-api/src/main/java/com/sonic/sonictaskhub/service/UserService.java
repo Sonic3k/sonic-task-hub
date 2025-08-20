@@ -2,6 +2,8 @@ package com.sonic.sonictaskhub.service;
 
 import com.sonic.sonictaskhub.model.dto.UserDto;
 import com.sonic.sonictaskhub.model.entity.User;
+import com.sonic.sonictaskhub.model.request.UserLoginRequest;
+import com.sonic.sonictaskhub.model.request.UserRegisterRequest;
 import com.sonic.sonictaskhub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +23,39 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    /**
+     * Register a new user from request object
+     */
+    public UserDto registerUser(UserRegisterRequest request) {
+        // Validate
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new RuntimeException("Username is required");
+        }
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Password is required");
+        }
+
+        // Call existing method
+        return registerUser(request.getUsername().trim(), request.getPassword(),
+                          request.getEmail(), request.getDisplayName());
+    }
+
+    /**
+     * Authenticate user from request object
+     */
+    public UserDto authenticateUser(UserLoginRequest request) {
+        // Validate
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            throw new RuntimeException("Username is required");
+        }
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Password is required");
+        }
+
+        // Call existing method
+        return authenticateUser(request.getUsername().trim(), request.getPassword());
+    }
 
     /**
      * Register a new user
