@@ -109,6 +109,9 @@ export const itemApi = {
   getById: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<Item>>> =>
     api.get(`/items/user/${userId}/item/${itemId}`),
 
+  getByNumber: (userId: number, itemNumber: number): Promise<AxiosResponse<BaseResponse<Item>>> =>
+    api.get(`/items/user/${userId}/number/${itemNumber}`),
+
   complete: (userId: number, itemId: number, actualDuration?: number): Promise<AxiosResponse<BaseResponse<Item>>> =>
     api.put(`/items/user/${userId}/item/${itemId}/complete`, { actualDuration }),
 

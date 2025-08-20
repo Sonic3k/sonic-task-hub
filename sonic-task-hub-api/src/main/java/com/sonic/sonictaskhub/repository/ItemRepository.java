@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -42,4 +43,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     
     @Query("SELECT i FROM Item i WHERE i.user.id = :userId AND i.status = 'SNOOZED' AND i.snoozedUntil <= :now")
     List<Item> findItemsToUnsnooze(@Param("userId") Long userId, @Param("now") LocalDateTime now);
+    
+    // Find by user and item number
+    Optional<Item> findByUserIdAndItemNumber(Long userId, Long itemNumber);
+    
+    // Get max item number for a user
+    @Query("SELECT MAX(i.itemNumber) FROM Item i WHERE i.user.id = :userId")
+    Long getMaxItemNumberForUser(@Param("userId") Long userId);
 }

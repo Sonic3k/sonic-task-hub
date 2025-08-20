@@ -20,4 +20,11 @@ public interface ItemProgressRepository extends JpaRepository<ItemProgress, Long
     
     @Query("SELECT COUNT(ip) FROM ItemProgress ip WHERE ip.item.id = :itemId AND ip.sessionDate = :date")
     Long countProgressByItemAndDate(@Param("itemId") Long itemId, @Param("date") LocalDate date);
+    
+    // Add this method for counting total progress entries for an item
+    Long countByItemId(Long itemId);
+    
+    // Optional: Count unique session dates for an item (actual days practiced)
+    @Query("SELECT COUNT(DISTINCT ip.sessionDate) FROM ItemProgress ip WHERE ip.item.id = :itemId")
+    Long countUniqueSessionDatesByItemId(@Param("itemId") Long itemId);
 }

@@ -7,8 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "items")
+@Table(name = "items", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "item_number"}))
 public class Item extends BaseEntity {
+    
+    @Column(name = "item_number", nullable = false)
+    private Long itemNumber; // Unique per user, auto-incremented
     
     @Column(name = "title", nullable = false, length = 255)
     private String title;
@@ -41,10 +45,10 @@ public class Item extends BaseEntity {
     @Column(name = "snoozed_until")
     private LocalDateTime snoozedUntil;
     
-    @Column(name = "estimated_duration") // in minutes
+    @Column(name = "estimated_duration")
     private Integer estimatedDuration;
     
-    @Column(name = "actual_duration") // in minutes
+    @Column(name = "actual_duration")
     private Integer actualDuration;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,7 +59,6 @@ public class Item extends BaseEntity {
     @JoinColumn(name = "category_id")
     private Category category;
     
-    // Self-referencing for nested subtasks
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_item_id")
     private Item parentItem;
@@ -68,11 +71,26 @@ public class Item extends BaseEntity {
     
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
+    
+    // For Habits - track stages/milestones
+    @Column(name = "habit_stage", length = 100)
+    private String habitStage; // e.g., "Beginner", "Intermediate", "Advanced"
+    
+    @Column(name = "habit_target_days")
+    private Integer habitTargetDays; // Target days to complete habit
 
     // Default constructor
     public Item() {}
 
     // Getters and Setters
+    public Long getItemNumber() {
+        return itemNumber;
+    }
+
+    public void setItemNumber(Long itemNumber) {
+        this.itemNumber = itemNumber;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -207,5 +225,21 @@ public class Item extends BaseEntity {
 
     public void setSortOrder(Integer sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public String getHabitStage() {
+        return habitStage;
+    }
+
+    public void setHabitStage(String habitStage) {
+        this.habitStage = habitStage;
+    }
+
+    public Integer getHabitTargetDays() {
+        return habitTargetDays;
+    }
+
+    public void setHabitTargetDays(Integer habitTargetDays) {
+        this.habitTargetDays = habitTargetDays;
     }
 }

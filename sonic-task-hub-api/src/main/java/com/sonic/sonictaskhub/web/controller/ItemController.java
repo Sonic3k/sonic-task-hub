@@ -121,6 +121,8 @@ public class ItemController {
             String dueDateStr = (String) request.get("dueDate");
             Object categoryIdObj = request.get("categoryId");
             Object estimatedDurationObj = request.get("estimatedDuration");
+            String habitStage = (String) request.get("habitStage");
+            Object habitTargetDaysObj = request.get("habitTargetDays");
 
             ItemType type = typeStr != null ? ItemType.valueOf(typeStr.toUpperCase()) : null;
             Priority priority = priorityStr != null ? Priority.valueOf(priorityStr.toUpperCase()) : null;
@@ -133,9 +135,11 @@ public class ItemController {
 
             Long categoryId = categoryIdObj != null ? Long.valueOf(categoryIdObj.toString()) : null;
             Integer estimatedDuration = estimatedDurationObj != null ? Integer.valueOf(estimatedDurationObj.toString()) : null;
+            Integer habitTargetDays = habitTargetDaysObj != null ? Integer.valueOf(habitTargetDaysObj.toString()) : null;
 
             ItemDto item = itemService.updateItem(userId, itemId, title, description, type, priority, 
-                                                 complexity, dueDate, categoryId, estimatedDuration);
+                                                 complexity, dueDate, categoryId, estimatedDuration,
+                                                 habitStage, habitTargetDays);
             return BaseResponse.success("Item updated successfully", item);
             
         } catch (Exception e) {
@@ -196,6 +200,25 @@ public class ItemController {
                                             @PathVariable(name = "itemId") Long itemId) {
         try {
             ItemDto item = itemService.getItemById(userId, itemId);
+            return BaseResponse.success(item);
+            
+        } catch (Exception e) {
+            return BaseResponse.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Get item by item number
+     * 
+     * @param userId the ID of the user
+     * @param itemNumber the item number
+     * @return BaseResponse with item data
+     */
+    @GetMapping("/user/{userId}/number/{itemNumber}")
+    public BaseResponse<ItemDto> getItemByNumber(@PathVariable(name = "userId") Long userId,
+                                                  @PathVariable(name = "itemNumber") Long itemNumber) {
+        try {
+            ItemDto item = itemService.getItemByNumber(userId, itemNumber);
             return BaseResponse.success(item);
             
         } catch (Exception e) {

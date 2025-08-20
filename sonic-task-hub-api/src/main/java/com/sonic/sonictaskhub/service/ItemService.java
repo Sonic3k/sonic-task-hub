@@ -6,6 +6,7 @@ import com.sonic.sonictaskhub.model.entity.Item;
 import com.sonic.sonictaskhub.model.entity.User;
 import com.sonic.sonictaskhub.model.enums.*;
 import com.sonic.sonictaskhub.repository.CategoryRepository;
+import com.sonic.sonictaskhub.repository.ItemProgressRepository;
 import com.sonic.sonictaskhub.repository.ItemRepository;
 import com.sonic.sonictaskhub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,17 @@ public class ItemService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    
+    @Autowired
+    private ItemProgressRepository itemProgressRepository;
+
+    /**
+     * Generate next item number for user
+     */
+    private Long generateItemNumber(Long userId) {
+        Long maxNumber = itemRepository.getMaxItemNumberForUser(userId);
+        return (maxNumber != null ? maxNumber : 0L) + 1;
+    }
 
     /**
      * Create a new item
@@ -43,6 +55,7 @@ public class ItemService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Item item = new Item();
+        item.setItemNumber(generateItemNumber(userId)); // Generate unique item number
         item.setTitle(title);
         item.setDescription(description);
         item.setType(type);
@@ -78,11 +91,21 @@ public class ItemService {
     }
 
     /**
+     * Get item by user and item number
+     */
+    public ItemDto getItemByNumber(Long userId, Long itemNumber) {
+        Item item = itemRepository.findByUserIdAndItemNumber(userId, itemNumber)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+        return convertToDto(item, true);
+    }
+
+    /**
      * Update an existing item
      */
     public ItemDto updateItem(Long userId, Long itemId, String title, String description, 
                              ItemType type, Priority priority, Complexity complexity, 
-                             LocalDateTime dueDate, Long categoryId, Integer estimatedDuration) {
+                             LocalDateTime dueDate, Long categoryId, Integer estimatedDuration,
+                             String habitStage, Integer habitTargetDays) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
@@ -98,6 +121,12 @@ public class ItemService {
         if (complexity != null) item.setComplexity(complexity);
         if (dueDate != null) item.setDueDate(dueDate);
         if (estimatedDuration != null) item.setEstimatedDuration(estimatedDuration);
+        
+        // Habit specific fields
+        if (type == ItemType.HABIT) {
+            if (habitStage != null) item.setHabitStage(habitStage);
+            if (habitTargetDays != null) item.setHabitTargetDays(habitTargetDays);
+        }
 
         // Update category
         if (categoryId != null) {
@@ -318,6 +347,7 @@ public class ItemService {
     private ItemDto convertToDto(Item item, boolean includeSubtasks) {
         ItemDto dto = new ItemDto();
         dto.setId(item.getId());
+        dto.setItemNumber(item.getItemNumber());
         dto.setTitle(item.getTitle());
         dto.setDescription(item.getDescription());
         dto.setType(item.getType());
@@ -332,6 +362,8 @@ public class ItemService {
         dto.setSortOrder(item.getSortOrder());
         dto.setCreatedAt(item.getCreatedAt());
         dto.setUpdatedAt(item.getUpdatedAt());
+        dto.setHabitStage(item.getHabitStage());
+        dto.setHabitTargetDays(item.getHabitTargetDays());
 
         // User info
         if (item.getUser() != null) {
@@ -363,6 +395,12 @@ public class ItemService {
             dto.setSubtasks(item.getSubtasks().stream()
                     .map(subtask -> convertToDto(subtask, false))
                     .collect(Collectors.toList()));
+        }
+        
+        // Calculate habit completed days
+        if (item.getType() == ItemType.HABIT) {
+            Long completedDays = itemProgressRepository.countByItemId(item.getId());
+            dto.setHabitCompletedDays(completedDays != null ? completedDays.intValue() : 0);
         }
 
         return dto;

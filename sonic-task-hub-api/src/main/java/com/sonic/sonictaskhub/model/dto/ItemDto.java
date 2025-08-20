@@ -6,6 +6,7 @@ import java.util.List;
 
 public class ItemDto {
     private Long id;
+    private Long itemNumber;
     private String title;
     private String description;
     private ItemType type;
@@ -28,6 +29,9 @@ public class ItemDto {
     private Integer subtaskCount;
     private Integer completedSubtaskCount;
     private Integer sortOrder;
+    private String habitStage;
+    private Integer habitTargetDays;
+    private Integer habitCompletedDays;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -36,6 +40,9 @@ public class ItemDto {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
+    public Long getItemNumber() { return itemNumber; }
+    public void setItemNumber(Long itemNumber) { this.itemNumber = itemNumber; }
     
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -102,6 +109,15 @@ public class ItemDto {
     
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+    
+    public String getHabitStage() { return habitStage; }
+    public void setHabitStage(String habitStage) { this.habitStage = habitStage; }
+    
+    public Integer getHabitTargetDays() { return habitTargetDays; }
+    public void setHabitTargetDays(Integer habitTargetDays) { this.habitTargetDays = habitTargetDays; }
+    
+    public Integer getHabitCompletedDays() { return habitCompletedDays; }
+    public void setHabitCompletedDays(Integer habitCompletedDays) { this.habitCompletedDays = habitCompletedDays; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

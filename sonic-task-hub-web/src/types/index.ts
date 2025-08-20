@@ -48,6 +48,7 @@ export interface Category {
 
 export interface Item {
   id: number;
+  itemNumber: number;
   title: string;
   description?: string;
   type: ItemType;
@@ -70,6 +71,9 @@ export interface Item {
   subtaskCount: number;
   completedSubtaskCount: number;
   sortOrder: number;
+  habitStage?: string;
+  habitTargetDays?: number;
+  habitCompletedDays?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -131,10 +135,12 @@ export interface ItemFormData {
   type: ItemType;
   priority: Priority;
   complexity: Complexity;
-  dueDate?: string; // Date string in YYYY-MM-DD format
+  dueDate?: string;
   categoryId?: number;
   parentItemId?: number;
   estimatedDuration?: number;
+  habitStage?: string;
+  habitTargetDays?: number;
 }
 
 export interface CategoryFormData {

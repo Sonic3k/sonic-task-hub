@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { TaskStudio } from './pages/TaskStudio';
+import { ItemDetailPage } from './pages/ItemDetailPage';
 import { Sidebar } from './components/Sidebar';
 import './styles/App.css';
 
@@ -15,9 +16,9 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen flex overflow-hidden">
       <Sidebar />
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-y-auto bg-gray-50">
         <Routes>
           <Route 
             path="/" 
@@ -26,6 +27,10 @@ const AppContent: React.FC = () => {
           <Route 
             path="/studio" 
             element={<TaskStudio userId={user!.id} />} 
+          />
+          <Route 
+            path="/studio/item/:itemNumber" 
+            element={<ItemDetailPage userId={user!.id} />} 
           />
           <Route 
             path="*" 
