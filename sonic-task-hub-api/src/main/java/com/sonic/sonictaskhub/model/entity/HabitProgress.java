@@ -1,31 +1,37 @@
-package com.sonic.sonictaskhub.model.dto;
+package com.sonic.sonictaskhub.model.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-public class ItemProgressDto {
-    private Long id;
-    private Long itemId;
-    private String itemTitle;
+@Entity
+@Table(name = "habit_progress")
+public class HabitProgress extends BaseEntity {
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "habit_id", nullable = false)
+    private Habit habit;
+    
+    @Column(name = "session_date", nullable = false)
     private LocalDate sessionDate;
+    
+    @Column(name = "duration")
     private Integer duration;
+    
+    @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+    
+    @Column(name = "progress_value")
     private Double progressValue;
+    
+    @Column(name = "progress_unit", length = 50)
     private String progressUnit;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    public ItemProgressDto() {}
+    // Default constructor
+    public HabitProgress() {}
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public Long getItemId() { return itemId; }
-    public void setItemId(Long itemId) { this.itemId = itemId; }
-    
-    public String getItemTitle() { return itemTitle; }
-    public void setItemTitle(String itemTitle) { this.itemTitle = itemTitle; }
+    public Habit getHabit() { return habit; }
+    public void setHabit(Habit habit) { this.habit = habit; }
     
     public LocalDate getSessionDate() { return sessionDate; }
     public void setSessionDate(LocalDate sessionDate) { this.sessionDate = sessionDate; }
@@ -41,10 +47,4 @@ public class ItemProgressDto {
     
     public String getProgressUnit() { return progressUnit; }
     public void setProgressUnit(String progressUnit) { this.progressUnit = progressUnit; }
-    
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

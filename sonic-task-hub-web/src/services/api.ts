@@ -4,16 +4,25 @@ import {
   PageResponse,
   User,
   Category,
-  Item,
-  ItemProgress,
-  ItemFormData,
+  Task,
+  Habit,
+  Note,
+  Event,
+  HabitProgress,
+  TaskFormData,
+  HabitFormData,
+  NoteFormData,
+  EventFormData,
+  HabitProgressFormData,
   CategoryFormData,
   UserFormData,
-  ProgressFormData,
-  ItemFilters,
-  ItemType,
-  ItemStatus,
-  Priority
+  TaskFilters,
+  HabitFilters,
+  NoteFilters,
+  EventFilters,
+  TaskStatus,
+  HabitStatus,
+  NoteStatus
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -35,7 +44,7 @@ api.interceptors.response.use(
   }
 );
 
-// User API
+// User API (unchanged)
 export const userApi = {
   register: (userData: UserFormData): Promise<AxiosResponse<BaseResponse<User>>> =>
     api.post('/users/register', userData),
@@ -59,7 +68,7 @@ export const userApi = {
     api.get(`/users/check-username?username=${username}`)
 };
 
-// Category API
+// Category API (unchanged)
 export const categoryApi = {
   getAvailableForUser: (userId: number): Promise<AxiosResponse<BaseResponse<Category[]>>> =>
     api.get(`/categories/user/${userId}`),
@@ -80,124 +89,146 @@ export const categoryApi = {
     api.get(`/categories/${categoryId}`)
 };
 
-// Item API
-export const itemApi = {
-  create: (userId: number, itemData: ItemFormData): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.post(`/items/user/${userId}`, itemData),
+// Task API
+export const taskApi = {
+  create: (userId: number, taskData: TaskFormData): Promise<AxiosResponse<BaseResponse<Task>>> =>
+    api.post(`/tasks/user/${userId}`, taskData),
 
-  update: (userId: number, itemId: number, itemData: Partial<ItemFormData>): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.put(`/items/user/${userId}/item/${itemId}`, itemData),
-
-  getWithFilters: (userId: number, filters: ItemFilters): Promise<AxiosResponse<BaseResponse<PageResponse<Item>>>> => {
+  getWithFilters: (userId: number, filters: TaskFilters): Promise<AxiosResponse<BaseResponse<PageResponse<Task>>>> => {
     const params = new URLSearchParams();
-    
-    console.log('API filters:', filters);
     
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         params.append(key, value.toString());
-        console.log(`Filter: ${key} = ${value}`);
       }
     });
 
-    const url = `/items/user/${userId}?${params.toString()}`;
-    console.log('Final API URL:', url);
-    
-    return api.get(url);
+    return api.get(`/tasks/user/${userId}?${params.toString()}`);
   },
 
-  getById: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.get(`/items/user/${userId}/item/${itemId}`),
+  getById: (userId: number, taskId: number): Promise<AxiosResponse<BaseResponse<Task>>> =>
+    api.get(`/tasks/user/${userId}/task/${taskId}`),
 
-  getByNumber: (userId: number, itemNumber: number): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.get(`/items/user/${userId}/number/${itemNumber}`),
+  getByNumber: (userId: number, taskNumber: number): Promise<AxiosResponse<BaseResponse<Task>>> =>
+    api.get(`/tasks/user/${userId}/number/${taskNumber}`),
 
-  complete: (userId: number, itemId: number, actualDuration?: number): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.put(`/items/user/${userId}/item/${itemId}/complete`, { actualDuration }),
+  complete: (userId: number, taskId: number, actualDuration?: number): Promise<AxiosResponse<BaseResponse<Task>>> =>
+    api.put(`/tasks/user/${userId}/task/${taskId}/complete`, { actualDuration }),
 
-  snooze: (userId: number, itemId: number, snoozeUntil: string): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.put(`/items/user/${userId}/item/${itemId}/snooze`, { snoozeUntil }),
+  snooze: (userId: number, taskId: number, snoozeUntil: string): Promise<AxiosResponse<BaseResponse<Task>>> =>
+    api.put(`/tasks/user/${userId}/task/${taskId}/snooze`, { snoozeUntil }),
 
-  updateStatus: (userId: number, itemId: number, status: ItemStatus): Promise<AxiosResponse<BaseResponse<Item>>> =>
-    api.put(`/items/user/${userId}/item/${itemId}/status`, { status }),
+  delete: (userId: number, taskId: number): Promise<AxiosResponse<BaseResponse<string>>> =>
+    api.delete(`/tasks/user/${userId}/task/${taskId}`),
 
-  delete: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<string>>> =>
-    api.delete(`/items/user/${userId}/item/${itemId}`),
-
-  getSubtasks: (userId: number, parentItemId: number): Promise<AxiosResponse<BaseResponse<Item[]>>> =>
-    api.get(`/items/user/${userId}/item/${parentItemId}/subtasks`),
-
-  getTopLevel: (userId: number): Promise<AxiosResponse<BaseResponse<Item[]>>> =>
-    api.get(`/items/user/${userId}/top-level`),
-
-  getOverdue: (userId: number): Promise<AxiosResponse<BaseResponse<Item[]>>> =>
-    api.get(`/items/user/${userId}/overdue`),
-
-  unsnoozeReady: (userId: number): Promise<AxiosResponse<BaseResponse<Item[]>>> =>
-    api.put(`/items/user/${userId}/unsnooze`, {}),
-
-  // Bulk operations
-  bulkComplete: (userId: number, itemIds: number[]): Promise<AxiosResponse<BaseResponse<string>>> =>
-    api.put(`/items/user/${userId}/bulk/complete`, { itemIds }),
-
-  bulkSnooze: (userId: number, itemIds: number[], snoozeUntil: string): Promise<AxiosResponse<BaseResponse<string>>> =>
-    api.put(`/items/user/${userId}/bulk/snooze`, { itemIds, snoozeUntil }),
-
-  bulkDelete: (userId: number, itemIds: number[]): Promise<AxiosResponse<BaseResponse<string>>> =>
-    api.delete(`/items/user/${userId}/bulk`, { data: { itemIds } })
+  getSubtasks: (userId: number, parentTaskId: number): Promise<AxiosResponse<BaseResponse<Task[]>>> =>
+    api.get(`/tasks/user/${userId}/task/${parentTaskId}/subtasks`)
 };
 
-// Progress API
-export const progressApi = {
-  log: (userId: number, itemId: number, progressData: ProgressFormData): Promise<AxiosResponse<BaseResponse<ItemProgress>>> =>
-    api.post(`/progress/user/${userId}/item/${itemId}`, progressData),
+// Habit API
+export const habitApi = {
+  create: (userId: number, habitData: HabitFormData): Promise<AxiosResponse<BaseResponse<Habit>>> =>
+    api.post(`/habits/user/${userId}`, habitData),
 
-  update: (userId: number, progressId: number, progressData: Partial<ProgressFormData>): Promise<AxiosResponse<BaseResponse<ItemProgress>>> =>
-    api.put(`/progress/user/${userId}/progress/${progressId}`, progressData),
+  getWithFilters: (userId: number, filters: HabitFilters): Promise<AxiosResponse<BaseResponse<PageResponse<Habit>>>> => {
+    const params = new URLSearchParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+
+    return api.get(`/habits/user/${userId}?${params.toString()}`);
+  },
+
+  getById: (userId: number, habitId: number): Promise<AxiosResponse<BaseResponse<Habit>>> =>
+    api.get(`/habits/user/${userId}/habit/${habitId}`),
+
+  getByNumber: (userId: number, habitNumber: number): Promise<AxiosResponse<BaseResponse<Habit>>> =>
+    api.get(`/habits/user/${userId}/number/${habitNumber}`),
+
+  updateStatus: (userId: number, habitId: number, status: HabitStatus): Promise<AxiosResponse<BaseResponse<Habit>>> =>
+    api.put(`/habits/user/${userId}/habit/${habitId}/status`, { status }),
+
+  delete: (userId: number, habitId: number): Promise<AxiosResponse<BaseResponse<string>>> =>
+    api.delete(`/habits/user/${userId}/habit/${habitId}`)
+};
+
+// Note API
+export const noteApi = {
+  create: (userId: number, noteData: NoteFormData): Promise<AxiosResponse<BaseResponse<Note>>> =>
+    api.post(`/notes/user/${userId}`, noteData),
+
+  getWithFilters: (userId: number, filters: NoteFilters): Promise<AxiosResponse<BaseResponse<PageResponse<Note>>>> => {
+    const params = new URLSearchParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+
+    return api.get(`/notes/user/${userId}?${params.toString()}`);
+  },
+
+  getById: (userId: number, noteId: number): Promise<AxiosResponse<BaseResponse<Note>>> =>
+    api.get(`/notes/user/${userId}/note/${noteId}`),
+
+  getByNumber: (userId: number, noteNumber: number): Promise<AxiosResponse<BaseResponse<Note>>> =>
+    api.get(`/notes/user/${userId}/number/${noteNumber}`),
+
+  archive: (userId: number, noteId: number): Promise<AxiosResponse<BaseResponse<Note>>> =>
+    api.put(`/notes/user/${userId}/note/${noteId}/archive`),
+
+  delete: (userId: number, noteId: number): Promise<AxiosResponse<BaseResponse<string>>> =>
+    api.delete(`/notes/user/${userId}/note/${noteId}`)
+};
+
+// Event API
+export const eventApi = {
+  create: (userId: number, eventData: EventFormData): Promise<AxiosResponse<BaseResponse<Event>>> =>
+    api.post(`/events/user/${userId}`, eventData),
+
+  getWithFilters: (userId: number, filters: EventFilters): Promise<AxiosResponse<BaseResponse<PageResponse<Event>>>> => {
+    const params = new URLSearchParams();
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+
+    return api.get(`/events/user/${userId}?${params.toString()}`);
+  },
+
+  getById: (userId: number, eventId: number): Promise<AxiosResponse<BaseResponse<Event>>> =>
+    api.get(`/events/user/${userId}/event/${eventId}`),
+
+  getInDateRange: (userId: number, startDate: string, endDate: string): Promise<AxiosResponse<BaseResponse<Event[]>>> =>
+    api.get(`/events/user/${userId}/range?startDate=${startDate}&endDate=${endDate}`),
+
+  delete: (userId: number, eventId: number): Promise<AxiosResponse<BaseResponse<string>>> =>
+    api.delete(`/events/user/${userId}/event/${eventId}`)
+};
+
+// Habit Progress API
+export const habitProgressApi = {
+  log: (userId: number, habitId: number, progressData: HabitProgressFormData): Promise<AxiosResponse<BaseResponse<HabitProgress>>> =>
+    api.post(`/habit-progress/user/${userId}/habit/${habitId}`, progressData),
+
+  getForHabit: (userId: number, habitId: number): Promise<AxiosResponse<BaseResponse<HabitProgress[]>>> =>
+    api.get(`/habit-progress/user/${userId}/habit/${habitId}`),
+
+  getInDateRange: (userId: number, habitId: number, startDate: string, endDate: string): Promise<AxiosResponse<BaseResponse<HabitProgress[]>>> =>
+    api.get(`/habit-progress/user/${userId}/habit/${habitId}/range?startDate=${startDate}&endDate=${endDate}`),
 
   delete: (userId: number, progressId: number): Promise<AxiosResponse<BaseResponse<string>>> =>
-    api.delete(`/progress/user/${userId}/progress/${progressId}`),
-
-  getForItem: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<ItemProgress[]>>> =>
-    api.get(`/progress/user/${userId}/item/${itemId}`),
-
-  getInDateRange: (userId: number, itemId: number, startDate: string, endDate: string): Promise<AxiosResponse<BaseResponse<ItemProgress[]>>> =>
-    api.get(`/progress/user/${userId}/item/${itemId}/range?startDate=${startDate}&endDate=${endDate}`),
-
-  getById: (userId: number, progressId: number): Promise<AxiosResponse<BaseResponse<ItemProgress>>> =>
-    api.get(`/progress/user/${userId}/progress/${progressId}`),
-
-  hasProgressForDate: (userId: number, itemId: number, date: string): Promise<AxiosResponse<BaseResponse<boolean>>> =>
-    api.get(`/progress/user/${userId}/item/${itemId}/check?date=${date}`),
-
-  getTotalDuration: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<number>>> =>
-    api.get(`/progress/user/${userId}/item/${itemId}/total-duration`),
-
-  getTotalProgress: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<number>>> =>
-    api.get(`/progress/user/${userId}/item/${itemId}/total-progress`),
-
-  getStatistics: (userId: number, itemId: number): Promise<AxiosResponse<BaseResponse<any>>> =>
-    api.get(`/progress/user/${userId}/item/${itemId}/statistics`)
+    api.delete(`/habit-progress/user/${userId}/progress/${progressId}`)
 };
 
-// Helper functions for common operations
+// API Helpers
 export const apiHelpers = {
-  // Format date for API
-  formatDate: (date: Date): string => {
-    return date.toISOString();
-  },
-
-  // Format date for date input
-  formatDateForInput: (date: Date): string => {
-    return date.toISOString().split('T')[0];
-  },
-
-  // Parse API date
-  parseDate: (dateString: string): Date => {
-    return new Date(dateString);
-  },
-
-  // Handle API errors
   handleApiError: (error: any): string => {
     if (error.response?.data?.message) {
       return error.response.data.message;
@@ -206,16 +237,5 @@ export const apiHelpers = {
       return error.message;
     }
     return 'An unexpected error occurred';
-  },
-
-  // Create snooze date options
-  getSnoozeOptions: () => [
-    { label: '1 day', value: new Date(Date.now() + 24 * 60 * 60 * 1000) },
-    { label: '3 days', value: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) },
-    { label: '1 week', value: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
-    { label: '2 weeks', value: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) },
-    { label: '1 month', value: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
-  ]
+  }
 };
-
-export default api;
