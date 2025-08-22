@@ -136,7 +136,7 @@ export const EventDetailPage: React.FC<EventDetailPageProps> = ({ userId }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -239,27 +239,32 @@ export const EventDetailPage: React.FC<EventDetailPageProps> = ({ userId }) => {
               </div>
             )}
 
-            {/* Recurring Info */}
-            {event.isRecurring && event.recurringPattern && (
+            {/* Recurring Information */}
+            {event.isRecurring && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <Repeat className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900">Recurring Pattern</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">Recurring Event</h2>
                     <p className="text-sm text-gray-600">This event repeats</p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-900">
-                    {RECURRING_PATTERN_LABELS[event.recurringPattern]}
-                    {event.recurringInterval && event.recurringInterval > 1 && 
-                      ` (every ${event.recurringInterval})`}
-                  </p>
+                  {event.recurringPattern && (
+                    <p className="text-gray-900">
+                      <span className="font-medium">Pattern:</span> {RECURRING_PATTERN_LABELS[event.recurringPattern]}
+                    </p>
+                  )}
+                  {event.recurringInterval && (
+                    <p className="text-gray-900">
+                      <span className="font-medium">Interval:</span> Every {event.recurringInterval} time(s)
+                    </p>
+                  )}
                   {event.recurringEndDate && (
-                    <p className="text-sm text-gray-600">
-                      Until: {new Date(event.recurringEndDate).toLocaleDateString()}
+                    <p className="text-gray-900">
+                      <span className="font-medium">Ends:</span> {new Date(event.recurringEndDate).toLocaleDateString()}
                     </p>
                   )}
                 </div>
@@ -277,13 +282,6 @@ export const EventDetailPage: React.FC<EventDetailPageProps> = ({ userId }) => {
               </h2>
               
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-gray-600">Type</label>
-                  <div className="mt-1 text-sm text-gray-900">
-                    {event.isRecurring ? 'Recurring Event' : 'Single Event'}
-                  </div>
-                </div>
-
                 <div>
                   <label className="text-sm text-gray-600">Reminder</label>
                   <div className="mt-1 flex items-center gap-2">
@@ -315,29 +313,27 @@ export const EventDetailPage: React.FC<EventDetailPageProps> = ({ userId }) => {
                     {new Date(event.createdAt).toLocaleDateString()}
                   </div>
                 </div>
+
+                <div>
+                  <label className="text-sm text-gray-600">Last Updated</label>
+                  <div className="mt-1 text-sm text-gray-900">
+                    {new Date(event.updatedAt).toLocaleDateString()}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div>
-                  <h3 className="text-sm font-medium text-yellow-900 mb-1">Event Tips</h3>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    {isUpcoming() ? (
-                      <>
-                        <li>• Add this to your calendar app</li>
-                        <li>• Set additional reminders if needed</li>
-                        <li>• Plan your travel time to the location</li>
-                      </>
-                    ) : (
-                      <>
-                        <li>• This event has already occurred</li>
-                        <li>• You can still edit details if needed</li>
-                        <li>• Consider adding follow-up notes</li>
-                      </>
-                    )}
+                  <h3 className="text-sm font-medium text-blue-900 mb-1">Event Tips</h3>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Set appropriate reminders for important events</li>
+                    <li>• Add location details for better planning</li>
+                    <li>• Use recurring events for regular meetings</li>
+                    <li>• Group related events with categories</li>
                   </ul>
                 </div>
               </div>

@@ -145,7 +145,7 @@ export const HabitDetailPage: React.FC<HabitDetailPageProps> = ({ userId }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -168,35 +168,15 @@ export const HabitDetailPage: React.FC<HabitDetailPageProps> = ({ userId }) => {
             </div>
             <div className="flex items-center gap-2">
               {habit.status === HabitStatus.ACTIVE && (
-                <>
-                  <button
-                    onClick={() => setShowProgressModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-white rounded-lg hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#483b85' }}
-                  >
-                    <TrendingUp className="w-4 h-4" />
-                    Log Progress
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus(HabitStatus.PAUSED)}
-                    className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                    title="Pause"
-                  >
-                    <Pause className="w-4 h-4" />
-                  </button>
-                </>
-              )}
-              
-              {habit.status === HabitStatus.PAUSED && (
                 <button
-                  onClick={() => handleUpdateStatus(HabitStatus.ACTIVE)}
-                  className="flex items-center gap-2 px-4 py-2 text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                  onClick={() => setShowProgressModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 text-white rounded-lg hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#483b85' }}
                 >
-                  <Play className="w-4 h-4" />
-                  Resume
+                  <Target className="w-4 h-4" />
+                  Log Progress
                 </button>
               )}
-
               <button
                 onClick={() => setShowEditModal(true)}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -349,7 +329,7 @@ export const HabitDetailPage: React.FC<HabitDetailPageProps> = ({ userId }) => {
                 <div>
                   <label className="text-sm text-gray-600">Sessions Logged</label>
                   <div className="mt-1 text-sm text-gray-900">
-                    {habit.completedDays} sessions
+                    {progressHistory.length}
                   </div>
                 </div>
 
