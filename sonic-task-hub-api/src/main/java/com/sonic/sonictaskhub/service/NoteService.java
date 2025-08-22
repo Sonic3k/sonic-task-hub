@@ -141,6 +141,45 @@ public class NoteService {
 
         noteRepository.delete(note);
     }
+    
+    /**
+     * Update an existing note
+     */
+    public NoteDto updateNote(Long userId, Long noteId, NoteCreateRequest request) {
+        // Validate
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Note title is required");
+        }
+
+        // Find existing note
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note not found"));
+
+        if (!note.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Note doesn't belong to this user");
+        }
+
+        // Parse enums
+        Priority priority = request.getPriority() != null ? 
+            Priority.valueOf(request.getPriority().toUpperCase()) : Priority.MEDIUM;
+
+        // Update note fields
+        note.setTitle(request.getTitle().trim());
+        note.setDescription(request.getDescription());
+        note.setPriority(priority);
+
+        // Update category
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            note.setCategory(category);
+        } else {
+            note.setCategory(null);
+        }
+
+        Note updatedNote = noteRepository.save(note);
+        return convertToDto(updatedNote);
+    }
 
     /**
      * Convert Note entity to NoteDto

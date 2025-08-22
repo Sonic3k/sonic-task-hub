@@ -196,6 +196,26 @@ public class TaskController {
     }
 
     /**
+     * Update an existing task
+     * 
+     * @param userId the ID of the user
+     * @param taskId the ID of the task to update
+     * @param request containing updated task details
+     * @return BaseResponse with updated task data
+     */
+    @PutMapping("/user/{userId}/task/{taskId}")
+    public BaseResponse<TaskDto> updateTask(@PathVariable(name = "userId") Long userId,
+                                           @PathVariable(name = "taskId") Long taskId,
+                                           @RequestBody TaskCreateRequest request) {
+        try {
+            TaskDto task = taskService.updateTask(userId, taskId, request);
+            return BaseResponse.success("Task updated successfully", task);
+        } catch (Exception e) {
+            return BaseResponse.error(e.getMessage());
+        }
+    }
+    
+    /**
      * Delete a task
      * 
      * @param userId the ID of the user

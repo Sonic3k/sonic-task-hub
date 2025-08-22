@@ -202,6 +202,63 @@ public class TaskService {
                 .map(task -> convertToDto(task, false))
                 .collect(Collectors.toList());
     }
+    
+    /**
+     * Update an existing task
+     */
+    public TaskDto updateTask(Long userId, Long taskId, TaskCreateRequest request) {
+        // Validate
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Task title is required");
+        }
+
+        // Find existing task
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (!task.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Task doesn't belong to this user");
+        }
+
+        // Parse enums
+        Priority priority = request.getPriority() != null ? 
+            Priority.valueOf(request.getPriority().toUpperCase()) : Priority.MEDIUM;
+        Complexity complexity = request.getComplexity() != null ?
+            Complexity.valueOf(request.getComplexity().toUpperCase()) : Complexity.MEDIUM;
+
+        // Update task fields
+        task.setTitle(request.getTitle().trim());
+        task.setDescription(request.getDescription());
+        task.setPriority(priority);
+        task.setComplexity(complexity);
+        task.setDueDate(request.getDueDate());
+        task.setEstimatedDuration(request.getEstimatedDuration());
+
+        // Update category
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            task.setCategory(category);
+        } else {
+            task.setCategory(null);
+        }
+
+        // Update parent task
+        if (request.getParentTaskId() != null) {
+            Task parentTask = taskRepository.findById(request.getParentTaskId())
+                    .orElseThrow(() -> new RuntimeException("Parent task not found"));
+            
+            if (!parentTask.getUser().getId().equals(userId)) {
+                throw new RuntimeException("Parent task doesn't belong to this user");
+            }
+            task.setParentTask(parentTask);
+        } else {
+            task.setParentTask(null);
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return convertToDto(updatedTask, false);
+    }
 
     /**
      * Convert Task entity to TaskDto

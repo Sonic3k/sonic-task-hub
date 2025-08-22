@@ -139,6 +139,26 @@ public class NoteController {
             return BaseResponse.error(e.getMessage());
         }
     }
+    
+    /**
+     * Update an existing note
+     * 
+     * @param userId the ID of the user
+     * @param noteId the ID of the note to update
+     * @param request containing updated note details
+     * @return BaseResponse with updated note data
+     */
+    @PutMapping("/user/{userId}/note/{noteId}")
+    public BaseResponse<NoteDto> updateNote(@PathVariable(name = "userId") Long userId,
+                                           @PathVariable(name = "noteId") Long noteId,
+                                           @RequestBody NoteCreateRequest request) {
+        try {
+            NoteDto note = noteService.updateNote(userId, noteId, request);
+            return BaseResponse.success("Note updated successfully", note);
+        } catch (Exception e) {
+            return BaseResponse.error(e.getMessage());
+        }
+    }
 
     /**
      * Delete a note

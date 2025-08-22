@@ -224,6 +224,68 @@ public class EventService {
 
         eventRepository.delete(event);
     }
+    
+    /**
+     * Update an existing event
+     */
+    public EventDto updateEvent(Long userId, Long eventId, EventCreateRequest request) {
+        // Validate
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Event title is required");
+        }
+        if (request.getEventDateTime() == null) {
+            throw new RuntimeException("Event date and time is required");
+        }
+
+        // Find existing event
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        if (!event.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Event doesn't belong to this user");
+        }
+
+        // Update event fields
+        event.setTitle(request.getTitle().trim());
+        event.setDescription(request.getDescription());
+        event.setEventDateTime(request.getEventDateTime());
+        event.setLocation(request.getLocation());
+        event.setReminderMinutes(request.getReminderMinutes());
+        event.setIsRecurring(request.getIsRecurring() != null && request.getIsRecurring());
+
+        // Update category
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            event.setCategory(category);
+        } else {
+            event.setCategory(null);
+        }
+
+        // Handle recurring
+        if (event.getIsRecurring() && request.getRecurringPattern() != null) {
+            RecurringPattern pattern = RecurringPattern.valueOf(request.getRecurringPattern().toUpperCase());
+            event.setRecurringPattern(pattern);
+            event.setRecurringInterval(request.getRecurringInterval());
+            event.setRecurringEndDate(request.getRecurringEndDate());
+        } else {
+            event.setRecurringPattern(null);
+            event.setRecurringInterval(null);
+            event.setRecurringEndDate(null);
+        }
+
+        Event updatedEvent = eventRepository.save(event);
+        return convertToDto(updatedEvent);
+    }
+    
+    /**
+     * Get event by number
+     */
+    public EventDto getEventByNumber(Long userId, Long eventNumber) {
+        Event event = eventRepository.findByUserIdAndEventNumber(userId, eventNumber)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+        return convertToDto(event);
+    }
 
     /**
      * Convert Event entity to EventDto

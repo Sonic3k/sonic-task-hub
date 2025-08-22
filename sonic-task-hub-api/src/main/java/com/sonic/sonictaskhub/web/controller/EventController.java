@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -120,6 +121,26 @@ public class EventController {
             return BaseResponse.error(e.getMessage());
         }
     }
+    
+    /**
+     * Update an existing event
+     * 
+     * @param userId the ID of the user
+     * @param eventId the ID of the event to update
+     * @param request containing updated event details
+     * @return BaseResponse with updated event data
+     */
+    @PutMapping("/user/{userId}/event/{eventId}")
+    public BaseResponse<EventDto> updateEvent(@PathVariable(name = "userId") Long userId,
+                                             @PathVariable(name = "eventId") Long eventId,
+                                             @RequestBody EventCreateRequest request) {
+        try {
+            EventDto event = eventService.updateEvent(userId, eventId, request);
+            return BaseResponse.success("Event updated successfully", event);
+        } catch (Exception e) {
+            return BaseResponse.error(e.getMessage());
+        }
+    }
 
     /**
      * Delete an event
@@ -134,6 +155,24 @@ public class EventController {
         try {
             eventService.deleteEvent(userId, eventId);
             return BaseResponse.success("Event deleted successfully", "Event has been deleted");
+        } catch (Exception e) {
+            return BaseResponse.error(e.getMessage());
+        }
+    }
+    
+    /**
+     * Get event by event number
+     * 
+     * @param userId the ID of the user
+     * @param eventNumber the event number
+     * @return BaseResponse with event data
+     */
+    @GetMapping("/user/{userId}/number/{eventNumber}")
+    public BaseResponse<EventDto> getEventByNumber(@PathVariable(name = "userId") Long userId,
+                                                  @PathVariable(name = "eventNumber") Long eventNumber) {
+        try {
+            EventDto event = eventService.getEventByNumber(userId, eventNumber);
+            return BaseResponse.success(event);
         } catch (Exception e) {
             return BaseResponse.error(e.getMessage());
         }

@@ -145,6 +145,26 @@ public class HabitController {
             return BaseResponse.error(e.getMessage());
         }
     }
+    
+    /**
+     * Update an existing habit
+     * 
+     * @param userId the ID of the user
+     * @param habitId the ID of the habit to update
+     * @param request containing updated habit details
+     * @return BaseResponse with updated habit data
+     */
+    @PutMapping("/user/{userId}/habit/{habitId}")
+    public BaseResponse<HabitDto> updateHabit(@PathVariable(name = "userId") Long userId,
+                                             @PathVariable(name = "habitId") Long habitId,
+                                             @RequestBody HabitCreateRequest request) {
+        try {
+            HabitDto habit = habitService.updateHabit(userId, habitId, request);
+            return BaseResponse.success("Habit updated successfully", habit);
+        } catch (Exception e) {
+            return BaseResponse.error(e.getMessage());
+        }
+    }
 
     /**
      * Delete a habit

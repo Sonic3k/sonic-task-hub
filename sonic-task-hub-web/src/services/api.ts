@@ -44,7 +44,7 @@ api.interceptors.response.use(
   }
 );
 
-// User API (unchanged)
+// User API
 export const userApi = {
   register: (userData: UserFormData): Promise<AxiosResponse<BaseResponse<User>>> =>
     api.post('/users/register', userData),
@@ -68,7 +68,7 @@ export const userApi = {
     api.get(`/users/check-username?username=${username}`)
 };
 
-// Category API (unchanged)
+// Category API
 export const categoryApi = {
   getAvailableForUser: (userId: number): Promise<AxiosResponse<BaseResponse<Category[]>>> =>
     api.get(`/categories/user/${userId}`),
@@ -112,6 +112,9 @@ export const taskApi = {
   getByNumber: (userId: number, taskNumber: number): Promise<AxiosResponse<BaseResponse<Task>>> =>
     api.get(`/tasks/user/${userId}/number/${taskNumber}`),
 
+  update: (userId: number, taskId: number, taskData: TaskFormData): Promise<AxiosResponse<BaseResponse<Task>>> =>
+    api.put(`/tasks/user/${userId}/task/${taskId}`, taskData),
+
   complete: (userId: number, taskId: number, actualDuration?: number): Promise<AxiosResponse<BaseResponse<Task>>> =>
     api.put(`/tasks/user/${userId}/task/${taskId}/complete`, { actualDuration }),
 
@@ -148,6 +151,9 @@ export const habitApi = {
   getByNumber: (userId: number, habitNumber: number): Promise<AxiosResponse<BaseResponse<Habit>>> =>
     api.get(`/habits/user/${userId}/number/${habitNumber}`),
 
+  update: (userId: number, habitId: number, habitData: HabitFormData): Promise<AxiosResponse<BaseResponse<Habit>>> =>
+    api.put(`/habits/user/${userId}/habit/${habitId}`, habitData),
+
   updateStatus: (userId: number, habitId: number, status: HabitStatus): Promise<AxiosResponse<BaseResponse<Habit>>> =>
     api.put(`/habits/user/${userId}/habit/${habitId}/status`, { status }),
 
@@ -178,6 +184,9 @@ export const noteApi = {
   getByNumber: (userId: number, noteNumber: number): Promise<AxiosResponse<BaseResponse<Note>>> =>
     api.get(`/notes/user/${userId}/number/${noteNumber}`),
 
+  update: (userId: number, noteId: number, noteData: NoteFormData): Promise<AxiosResponse<BaseResponse<Note>>> =>
+    api.put(`/notes/user/${userId}/note/${noteId}`, noteData),
+
   archive: (userId: number, noteId: number): Promise<AxiosResponse<BaseResponse<Note>>> =>
     api.put(`/notes/user/${userId}/note/${noteId}/archive`),
 
@@ -204,6 +213,12 @@ export const eventApi = {
 
   getById: (userId: number, eventId: number): Promise<AxiosResponse<BaseResponse<Event>>> =>
     api.get(`/events/user/${userId}/event/${eventId}`),
+
+  getByNumber: (userId: number, eventNumber: number): Promise<AxiosResponse<BaseResponse<Event>>> =>
+    api.get(`/events/user/${userId}/number/${eventNumber}`),
+
+  update: (userId: number, eventId: number, eventData: EventFormData): Promise<AxiosResponse<BaseResponse<Event>>> =>
+    api.put(`/events/user/${userId}/event/${eventId}`, eventData),
 
   getInDateRange: (userId: number, startDate: string, endDate: string): Promise<AxiosResponse<BaseResponse<Event[]>>> =>
     api.get(`/events/user/${userId}/range?startDate=${startDate}&endDate=${endDate}`),

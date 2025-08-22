@@ -142,6 +142,42 @@ public class HabitService {
 
         habitRepository.delete(habit);
     }
+    
+    /**
+     * Update an existing habit
+     */
+    public HabitDto updateHabit(Long userId, Long habitId, HabitCreateRequest request) {
+        // Validate
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new RuntimeException("Habit title is required");
+        }
+
+        // Find existing habit
+        Habit habit = habitRepository.findById(habitId)
+                .orElseThrow(() -> new RuntimeException("Habit not found"));
+
+        if (!habit.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Habit doesn't belong to this user");
+        }
+
+        // Update habit fields
+        habit.setTitle(request.getTitle().trim());
+        habit.setDescription(request.getDescription());
+        habit.setHabitStage(request.getHabitStage());
+        habit.setTargetDays(request.getTargetDays());
+
+        // Update category
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            habit.setCategory(category);
+        } else {
+            habit.setCategory(null);
+        }
+
+        Habit updatedHabit = habitRepository.save(habit);
+        return convertToDto(updatedHabit);
+    }
 
     /**
      * Convert Habit entity to HabitDto
